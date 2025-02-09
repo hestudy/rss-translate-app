@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
+  json,
   pgTableCreator,
   primaryKey,
   text,
@@ -131,6 +132,15 @@ export const verificationTokens = createTable(
   }),
 );
 
-async function main() {}
-
-main();
+export const rssOrigin = createTable("rssOrigin", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: varchar("name", { length: 255 }),
+  link: varchar("url", { length: 255 }).notNull(),
+  data: json("data"),
+  user: varchar("user", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+});
