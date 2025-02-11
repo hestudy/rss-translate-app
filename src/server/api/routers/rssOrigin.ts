@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db } from "~/server/db";
 import { count } from "drizzle-orm";
+import { z } from "zod";
+import { db } from "~/server/db";
 import { rssOrigin } from "~/server/db/schema";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const rssOriginRouter = createTRPCRouter({
   page: protectedProcedure
@@ -17,6 +17,11 @@ export const rssOriginRouter = createTRPCRouter({
         limit: input.pageSize,
         offset: (input.current - 1) * input.pageSize,
       });
-      const total = await db.select({ count: count() }).from(rssOrigin);
+      const res = await db.select({ count: count() }).from(rssOrigin);
+      const total = res.at(0)?.count;
+      return {
+        list,
+        total,
+      };
     }),
 });
