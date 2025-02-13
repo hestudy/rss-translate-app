@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "~/server/db";
 import { rssOrigin } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { addRssOriginZObject } from "../schema/rssOrigin";
 
 export const rssOriginRouter = createTRPCRouter({
   page: protectedProcedure
@@ -12,7 +13,7 @@ export const rssOriginRouter = createTRPCRouter({
         pageSize: z.number(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const list = await db.query.rssOrigin.findMany({
         limit: input.pageSize,
         offset: (input.current - 1) * input.pageSize,
@@ -23,5 +24,14 @@ export const rssOriginRouter = createTRPCRouter({
         list,
         total,
       };
+    }),
+  add: protectedProcedure
+    .input(addRssOriginZObject)
+    .mutation(async ({ input, ctx }) => {
+      return await db.insert(rssOrigin).values({
+        name: input.name,
+        link: input.link,
+        createdById: ctx.session.user.id,
+      });
     }),
 });

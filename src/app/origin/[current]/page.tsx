@@ -1,7 +1,18 @@
+import dayjs from "dayjs";
+import { isEmpty } from "lodash";
 import { Button } from "~/components/ui/button";
 import { Pagination, PaginationContent } from "~/components/ui/pagination";
-import { Table, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 import { api } from "~/trpc/server";
+import OriginFormDialog from "./_components/OriginFormDialog";
 
 export default async function page({
   params,
@@ -18,10 +29,13 @@ export default async function page({
   return (
     <div className="flex h-full flex-col space-y-4">
       <div className="flex items-center justify-end space-x-4">
-        <Button>Add Origin</Button>
+        <OriginFormDialog>
+          <Button>Add Origin</Button>
+        </OriginFormDialog>
       </div>
       <div className="h-0 flex-1">
         <Table>
+          {isEmpty(list) && <TableCaption>No Data</TableCaption>}
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -29,6 +43,19 @@ export default async function page({
               <TableHead>Created</TableHead>
             </TableRow>
           </TableHeader>
+          <TableBody>
+            {list.map((item) => {
+              return (
+                <TableRow key={item.id}>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.link}</TableCell>
+                  <TableCell>
+                    {dayjs(item.createdAt).format("YYYY-MM-DD")}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
         </Table>
       </div>
       <div className="flex justify-end">
