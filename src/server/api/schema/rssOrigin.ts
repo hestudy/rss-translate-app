@@ -1,6 +1,6 @@
 import { z } from "zod";
 
 export const addRssOriginZObject = z.object({
-  name: z.string(),
+  name: z.string().nonempty(),
   link: z.string().url(),
 });

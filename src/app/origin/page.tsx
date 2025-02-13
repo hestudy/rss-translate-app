@@ -2,6 +2,9 @@
 
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
+import { Edit, Trash } from "lucide-react";
+import { useForm } from "react-hook-form";
+import Spin from "~/app/_components/Spin";
 import { Button } from "~/components/ui/button";
 import { Pagination, PaginationContent } from "~/components/ui/pagination";
 import {
@@ -16,33 +19,39 @@ import {
 import { api } from "~/trpc/react";
 import OriginFormDialog from "./_components/OriginFormDialog";
 
-export default async function page({
-  params,
-}: {
-  params: Promise<{
-    current: string;
-  }>;
-}) {
+export default function page() {
+  const form = useForm({
+    defaultValues: {
+      current: 1,
+      pageSize: 10,
+    },
+  });
   const query = api.rssOrigin.page.useQuery({
-    current: Number((await params).current),
-    pageSize: 10,
+    current: form.watch("current"),
+    pageSize: form.watch("pageSize"),
   });
 
   return (
     <div className="flex h-full flex-col space-y-4">
       <div className="flex items-center justify-end space-x-4">
-        <OriginFormDialog>
+        <OriginFormDialog
+          onOk={() => {
+            query.refetch();
+          }}
+        >
           <Button>Add Origin</Button>
         </OriginFormDialog>
       </div>
-      <div className="h-0 flex-1">
+      <div className="relative h-0 flex-1 overflow-y-auto">
+        {query.isPending && <Spin />}
         <Table>
           {isEmpty(query.data?.list) && <TableCaption>No Data</TableCaption>}
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Link</TableHead>
+              <TableHead className="w-[300px]">Link</TableHead>
               <TableHead>Created</TableHead>
+              <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -50,9 +59,27 @@ export default async function page({
               return (
                 <TableRow key={item.id}>
                   <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.link}</TableCell>
                   <TableCell>
-                    {dayjs(item.createdAt).format("YYYY-MM-DD")}
+                    <a href={item.link} target="_blank">
+                      <Button variant={"link"} className="p-0">
+                        {item.link}
+                      </Button>
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
+                  </TableCell>
+                  <TableCell className="space-x-2">
+                    <Button size={"icon"} variant={"link"}>
+                      <Edit />
+                    </Button>
+                    <Button
+                      variant={"link"}
+                      className="text-red-500"
+                      size={"icon"}
+                    >
+                      <Trash />
+                    </Button>
                   </TableCell>
                 </TableRow>
               );

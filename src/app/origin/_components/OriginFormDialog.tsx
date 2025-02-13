@@ -1,4 +1,4 @@
-import { memo, PropsWithChildren } from "react";
+import { memo, PropsWithChildren, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,14 +13,21 @@ const OriginFormDialog = memo(
     children,
     ...props
   }: PropsWithChildren<Parameters<typeof OriginForm>[0]>) => {
+    const [open, setOpen] = useState(false);
     return (
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Origin</DialogTitle>
           </DialogHeader>
-          <OriginForm {...props} />
+          <OriginForm
+            {...props}
+            onOk={() => {
+              setOpen(false);
+              props.onOk?.();
+            }}
+          />
         </DialogContent>
       </Dialog>
     );

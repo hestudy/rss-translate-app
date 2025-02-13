@@ -27,7 +27,7 @@ const items = [
   },
   {
     title: "Origin",
-    url: "/origin/1",
+    url: "/origin",
     icon: Home,
   },
 ];
