@@ -1,3 +1,5 @@
+"use client";
+
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import { Button } from "~/components/ui/button";
@@ -11,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
 import OriginFormDialog from "./_components/OriginFormDialog";
 
 export default async function page({
@@ -21,7 +23,7 @@ export default async function page({
     current: string;
   }>;
 }) {
-  const { list, total } = await api.rssOrigin.page({
+  const query = api.rssOrigin.page.useQuery({
     current: Number((await params).current),
     pageSize: 10,
   });
@@ -35,7 +37,7 @@ export default async function page({
       </div>
       <div className="h-0 flex-1">
         <Table>
-          {isEmpty(list) && <TableCaption>No Data</TableCaption>}
+          {isEmpty(query.data?.list) && <TableCaption>No Data</TableCaption>}
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -44,7 +46,7 @@ export default async function page({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {list.map((item) => {
+            {query.data?.list.map((item) => {
               return (
                 <TableRow key={item.id}>
                   <TableCell>{item.name}</TableCell>

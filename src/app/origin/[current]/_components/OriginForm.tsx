@@ -1,9 +1,8 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,8 +13,9 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { addRssOriginZObject } from "~/server/api/schema/rssOrigin";
+import { api } from "~/trpc/react";
 
-const OriginForm = memo(() => {
+const OriginForm = memo((props: { onOk?: () => void }) => {
   const form = useForm<z.infer<typeof addRssOriginZObject>>({
     defaultValues: {
       name: "",
@@ -25,9 +25,17 @@ const OriginForm = memo(() => {
     mode: "onChange",
   });
 
+  const mutation = api.rssOrigin.add.useMutation();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(() => {})} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(async (values) => {
+          await mutation.mutateAsync(values);
+          props.onOk?.();
+        })}
+        className="space-y-8"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -58,6 +66,11 @@ const OriginForm = memo(() => {
             );
           }}
         ></FormField>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            Submit
+          </Button>
+        </div>
       </form>
     </Form>
   );
