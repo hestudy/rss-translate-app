@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import Spin from "~/app/_components/Spin";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -15,7 +16,7 @@ import { Input } from "~/components/ui/input";
 import { addRssOriginZObject } from "~/server/api/schema/rssOrigin";
 import { api } from "~/trpc/react";
 
-const OriginForm = memo((props: { onOk?: () => void }) => {
+const OriginForm = memo((props: { onOk?: () => void; id?: string }) => {
   const form = useForm<z.infer<typeof addRssOriginZObject>>({
     defaultValues: {
       name: "",
@@ -25,17 +26,39 @@ const OriginForm = memo((props: { onOk?: () => void }) => {
     mode: "onChange",
   });
 
+  const query = api.rssOrigin.info.useQuery(
+    { id: props.id! },
+    { enabled: !!props.id, staleTime: 0 },
+  );
+
+  useEffect(() => {
+    if (query.data) {
+      // @ts-ignore
+      form.reset(query.data);
+    }
+  }, [query.data]);
+
   const mutation = api.rssOrigin.add.useMutation();
+
+  const editMutation = api.rssOrigin.edit.useMutation();
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(async (values) => {
-          await mutation.mutateAsync(values);
+          if (!props.id) {
+            await mutation.mutateAsync(values);
+          } else {
+            await editMutation.mutateAsync({
+              id: props.id,
+              ...values,
+            });
+          }
           props.onOk?.();
         })}
-        className="space-y-8"
+        className="relative space-y-8"
       >
+        {query.isPending && <Spin />}
         <FormField
           control={form.control}
           name="name"

@@ -1,9 +1,9 @@
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
 import { rssOrigin } from "~/server/db/schema";
+import { addRssOriginZObject, editRssOriginZObject } from "../schema/rssOrigin";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { addRssOriginZObject } from "../schema/rssOrigin";
 
 export const rssOriginRouter = createTRPCRouter({
   page: protectedProcedure
@@ -32,6 +32,28 @@ export const rssOriginRouter = createTRPCRouter({
         name: input.name,
         link: input.link,
         createdById: ctx.session.user.id,
+      });
+    }),
+  edit: protectedProcedure
+    .input(editRssOriginZObject)
+    .mutation(async ({ input }) => {
+      return await db
+        .update(rssOrigin)
+        .set({
+          name: input.name,
+          link: input.link,
+        })
+        .where(eq(rssOrigin.id, input.id));
+    }),
+  info: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .query(async ({ input }) => {
+      return await db.query.rssOrigin.findFirst({
+        where: eq(rssOrigin.id, input.id),
       });
     }),
 });

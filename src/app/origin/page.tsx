@@ -70,9 +70,16 @@ export default function page() {
                     {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
                   </TableCell>
                   <TableCell className="space-x-2">
-                    <Button size={"icon"} variant={"link"}>
-                      <Edit />
-                    </Button>
+                    <OriginFormDialog
+                      id={item.id}
+                      onOk={() => {
+                        query.refetch();
+                      }}
+                    >
+                      <Button size={"icon"} variant={"link"}>
+                        <Edit />
+                      </Button>
+                    </OriginFormDialog>
                     <Button
                       variant={"link"}
                       className="text-red-500"
