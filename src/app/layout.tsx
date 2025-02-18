@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
+import { Toaster } from "~/components/ui/sonner";
 import { TRPCReactProvider } from "~/trpc/react";
 import SidebarLayout from "./_layouts/sidebarLayout";
 
@@ -21,6 +22,7 @@ export default function RootLayout({
         <TRPCReactProvider>
           <SidebarLayout>{children}</SidebarLayout>
         </TRPCReactProvider>
+        <Toaster />
       </body>
     </html>
   );

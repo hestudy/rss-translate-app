@@ -56,4 +56,13 @@ export const rssOriginRouter = createTRPCRouter({
         where: eq(rssOrigin.id, input.id),
       });
     }),
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db.delete(rssOrigin).where(eq(rssOrigin.id, input.id));
+    }),
 });

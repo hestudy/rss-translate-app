@@ -2,8 +2,9 @@
 
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Play, Trash } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import Spin from "~/app/_components/Spin";
 import { Button } from "~/components/ui/button";
 import { Pagination, PaginationContent } from "~/components/ui/pagination";
@@ -17,6 +18,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { api } from "~/trpc/react";
+import ConfirmPopover from "../_components/confirmPopover";
 import OriginFormDialog from "./_components/OriginFormDialog";
 
 export default function page() {
@@ -31,11 +33,14 @@ export default function page() {
     pageSize: form.watch("pageSize"),
   });
 
+  const deleteMutation = api.rssOrigin.delete.useMutation();
+
   return (
     <div className="flex h-full flex-col space-y-4">
       <div className="flex items-center justify-end space-x-4">
         <OriginFormDialog
           onOk={() => {
+            toast.success("Add Origin Success");
             query.refetch();
           }}
         >
@@ -70,9 +75,13 @@ export default function page() {
                     {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
                   </TableCell>
                   <TableCell className="space-x-2">
+                    <Button size={"icon"} variant={"link"}>
+                      <Play />
+                    </Button>
                     <OriginFormDialog
                       id={item.id}
                       onOk={() => {
+                        toast.success("Update Origin Success");
                         query.refetch();
                       }}
                     >
@@ -80,13 +89,24 @@ export default function page() {
                         <Edit />
                       </Button>
                     </OriginFormDialog>
-                    <Button
-                      variant={"link"}
-                      className="text-red-500"
-                      size={"icon"}
+                    <ConfirmPopover
+                      title="Delete Origin?"
+                      onConfirm={async () => {
+                        await deleteMutation.mutateAsync({
+                          id: item.id,
+                        });
+                        toast.success("Delete Origin Success");
+                        query.refetch();
+                      }}
                     >
-                      <Trash />
-                    </Button>
+                      <Button
+                        variant={"link"}
+                        className="text-red-500"
+                        size={"icon"}
+                      >
+                        <Trash />
+                      </Button>
+                    </ConfirmPopover>
                   </TableCell>
                 </TableRow>
               );
