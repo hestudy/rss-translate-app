@@ -158,6 +158,7 @@ export const rssData = createTable("rssData", {
     .notNull()
     .$defaultFn(() => crypto.randomUUID()),
   data: json("data").notNull(),
+  jobId: varchar("job_id", { length: 255 }),
   rssOriginId: varchar("rss_origin_id", { length: 255 })
     .notNull()
     .references(() => rssOrigin.id),

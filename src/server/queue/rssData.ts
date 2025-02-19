@@ -29,6 +29,7 @@ const worker = new Worker<{
       data: feed,
       rssOriginId: job.data.origin.id,
       createdById: job.data.user.id!,
+      jobId: job.id,
     });
   },
   {

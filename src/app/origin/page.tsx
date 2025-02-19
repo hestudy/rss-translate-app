@@ -2,7 +2,7 @@
 
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
-import { Edit, Play, Trash } from "lucide-react";
+import { Edit, History, Play, Trash } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Spin from "~/app/_components/Spin";
@@ -20,6 +20,7 @@ import {
 import { api } from "~/trpc/react";
 import ConfirmPopover from "../_components/confirmPopover";
 import OriginFormDialog from "./_components/OriginFormDialog";
+import HistoryDataSheet from "./_components/HistoryDataSheet";
 
 export default function page() {
   const form = useForm({
@@ -56,7 +57,7 @@ export default function page() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead className="w-[300px]">Link</TableHead>
-              <TableHead>JobId</TableHead>
+              <TableHead>JobStatus</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
@@ -91,6 +92,11 @@ export default function page() {
                         <Play />
                       </Button>
                     </ConfirmPopover>
+                    <HistoryDataSheet>
+                      <Button size={"icon"} variant={"link"}>
+                        <History />
+                      </Button>
+                    </HistoryDataSheet>
                     <OriginFormDialog
                       id={item.id}
                       onOk={() => {
