@@ -2,6 +2,7 @@ import { count, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
 import { rssOrigin } from "~/server/db/schema";
+import { rssDataQueue } from "~/server/queue/rssData";
 import { addRssOriginZObject, editRssOriginZObject } from "../schema/rssOrigin";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -18,6 +19,7 @@ export const rssOriginRouter = createTRPCRouter({
         limit: input.pageSize,
         offset: (input.current - 1) * input.pageSize,
       });
+
       const res = await db.select({ count: count() }).from(rssOrigin);
       const total = res.at(0)?.count;
       return {
@@ -64,5 +66,29 @@ export const rssOriginRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       return await db.delete(rssOrigin).where(eq(rssOrigin.id, input.id));
+    }),
+  run: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const origin = await db.query.rssOrigin.findFirst({
+        where: eq(rssOrigin.id, input.id),
+      });
+      if (origin) {
+        const job = await rssDataQueue.add("rssData", {
+          origin,
+          user: ctx.session.user,
+        });
+        await db
+          .update(rssOrigin)
+          .set({
+            jobId: job.id,
+            jobStatus: await job.getState(),
+          })
+          .where(eq(rssOrigin.id, input.id));
+      }
     }),
 });

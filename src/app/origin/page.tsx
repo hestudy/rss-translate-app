@@ -34,6 +34,7 @@ export default function page() {
   });
 
   const deleteMutation = api.rssOrigin.delete.useMutation();
+  const runMutation = api.rssOrigin.run.useMutation();
 
   return (
     <div className="flex h-full flex-col space-y-4">
@@ -55,6 +56,7 @@ export default function page() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead className="w-[300px]">Link</TableHead>
+              <TableHead>JobId</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
@@ -71,13 +73,24 @@ export default function page() {
                       </Button>
                     </a>
                   </TableCell>
+                  <TableCell>{item.jobStatus}</TableCell>
                   <TableCell>
                     {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
                   </TableCell>
                   <TableCell className="space-x-2">
-                    <Button size={"icon"} variant={"link"}>
-                      <Play />
-                    </Button>
+                    <ConfirmPopover
+                      title="Confirm Run?"
+                      onConfirm={async () => {
+                        await runMutation.mutateAsync({
+                          id: item.id,
+                        });
+                        query.refetch();
+                      }}
+                    >
+                      <Button size={"icon"} variant={"link"}>
+                        <Play />
+                      </Button>
+                    </ConfirmPopover>
                     <OriginFormDialog
                       id={item.id}
                       onOk={() => {
