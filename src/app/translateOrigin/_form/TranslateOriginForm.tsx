@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memo, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import Spin from "~/app/_components/Spin";
 import { Button } from "~/components/ui/button";
@@ -64,14 +65,25 @@ const TranslateOriginForm = memo(
         <form
           onSubmit={form.handleSubmit(async (values) => {
             if (props.id) {
-              await editMutation.mutateAsync({
+              const res = await editMutation.mutateAsync({
                 ...values,
                 id: props.id,
               });
+              if (res.error) {
+                toast.error(res.error);
+              } else {
+                toast.success("Edit Success");
+                props.onOk?.();
+              }
             } else {
-              await mutation.mutateAsync(values);
+              const res = await mutation.mutateAsync(values);
+              if (res.error) {
+                toast.error(res.error);
+              } else {
+                toast.success("Create Success");
+                props.onOk?.();
+              }
             }
-            props.onOk?.();
           })}
           className="relative space-y-2"
         >
@@ -99,7 +111,7 @@ const TranslateOriginForm = memo(
                 <FormItem>
                   <FormLabel>ApiKey</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} type="password" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

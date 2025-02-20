@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "~/server/db";
 import { translateOrigin } from "~/server/db/schema";
 import { authProcedure, createTRPCRouter } from "../trpc";
+import { ChatOpenAI } from "@langchain/openai";
 
 export const translateOriginRouter = createTRPCRouter({
   create: authProcedure
@@ -15,10 +16,23 @@ export const translateOriginRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      return await db.insert(translateOrigin).values({
-        ...input,
-        createdById: ctx.session.user.id,
+      const model = new ChatOpenAI({
+        model: input.model,
+        apiKey: input.apiKey,
+        configuration: {
+          baseURL: input.baseUrl,
+        },
       });
+      const res = await model.invoke("hi").catch(() => ({ content: "" }));
+      if (!res.content) {
+        return { error: "No response from OpenAI" };
+      }
+      return {
+        data: await db.insert(translateOrigin).values({
+          ...input,
+          createdById: ctx.session.user.id,
+        }),
+      };
     }),
   list: authProcedure.query(async () => {
     const result = await db.query.translateOrigin.findMany();
@@ -38,11 +52,24 @@ export const translateOriginRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      const model = new ChatOpenAI({
+        model: input.model,
+        apiKey: input.apiKey,
+        configuration: {
+          baseURL: input.baseUrl,
+        },
+      });
+      const res = await model.invoke("hi").catch(() => ({ content: "" }));
+      if (!res.content) {
+        return { error: "No response from OpenAI" };
+      }
       const { id, ...props } = input;
-      return await db
-        .update(translateOrigin)
-        .set(props)
-        .where(eq(translateOrigin.id, id));
+      return {
+        data: await db
+          .update(translateOrigin)
+          .set(props)
+          .where(eq(translateOrigin.id, id)),
+      };
     }),
   delete: authProcedure
     .input(
