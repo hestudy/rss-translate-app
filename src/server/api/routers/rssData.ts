@@ -18,6 +18,7 @@ export const rssDataRouter = createTRPCRouter({
         limit: input.pageSize,
         offset: (input.current - 1) * input.pageSize,
         where: eq(rssData.rssOriginId, input.rssOrigin),
+        orderBy: (rssData, { desc }) => [desc(rssData.createdAt)],
       });
       const res = await db
         .select({

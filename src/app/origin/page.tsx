@@ -1,41 +1,133 @@
 "use client";
 
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import dayjs from "dayjs";
-import { isEmpty } from "lodash";
 import { Edit, History, Play, Trash } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import Spin from "~/app/_components/Spin";
 import { Button } from "~/components/ui/button";
-import { Pagination, PaginationContent } from "~/components/ui/pagination";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
 import { api } from "~/trpc/react";
+import { initData } from "../_common/values";
 import ConfirmPopover from "../_components/confirmPopover";
-import OriginFormDialog from "./_components/OriginFormDialog";
+import HPagination from "../_components/HPagination";
+import HTable from "../_components/HTable";
+import { usePaginationState } from "../_hooks/usePaginationState";
 import HistoryDataSheet from "./_components/HistoryDataSheet";
+import OriginFormDialog from "./_components/OriginFormDialog";
 
+const columnHelper = createColumnHelper<{
+  id: string;
+  name: string | null;
+  createdById: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  link: string;
+  jobId: string | null;
+  jobStatus: string | null;
+}>();
 export default function page() {
-  const form = useForm({
-    defaultValues: {
-      current: 1,
-      pageSize: 10,
-    },
-  });
+  const { current, pageSize } = usePaginationState();
   const query = api.rssOrigin.page.useQuery({
-    current: form.watch("current"),
-    pageSize: form.watch("pageSize"),
+    current,
+    pageSize,
   });
 
   const deleteMutation = api.rssOrigin.delete.useMutation();
   const runMutation = api.rssOrigin.run.useMutation();
+
+  const columns = useMemo(() => {
+    return [
+      columnHelper.accessor("name", {
+        header: "Name",
+      }),
+      columnHelper.accessor("link", {
+        header: "Link",
+        cell(props) {
+          return (
+            <a href={props.getValue()} target="_blank">
+              <Button variant={"link"} className="p-0">
+                {props.getValue()}
+              </Button>
+            </a>
+          );
+        },
+      }),
+      columnHelper.accessor("jobStatus", {
+        header: "JobStatus",
+      }),
+      columnHelper.accessor("createdAt", {
+        header: "CreatedAt",
+        cell(props) {
+          return dayjs(props.getValue()).format("YYYY-MM-DD HH:mm:ss");
+        },
+      }),
+      columnHelper.display({
+        id: "action",
+        header: "Action",
+        cell(props) {
+          const id = props.row.original.id;
+          return (
+            <div className="space-x-2">
+              <ConfirmPopover
+                title="Confirm Run?"
+                onConfirm={async () => {
+                  await runMutation.mutateAsync({
+                    id,
+                  });
+                  query.refetch();
+                }}
+              >
+                <Button size={"icon"} variant={"link"}>
+                  <Play />
+                </Button>
+              </ConfirmPopover>
+              <HistoryDataSheet id={id}>
+                <Button size={"icon"} variant={"link"}>
+                  <History />
+                </Button>
+              </HistoryDataSheet>
+              <OriginFormDialog
+                id={id}
+                onOk={() => {
+                  toast.success("Update Origin Success");
+                  query.refetch();
+                }}
+              >
+                <Button size={"icon"} variant={"link"}>
+                  <Edit />
+                </Button>
+              </OriginFormDialog>
+              <ConfirmPopover
+                title="Delete Origin?"
+                onConfirm={async () => {
+                  await deleteMutation.mutateAsync({
+                    id,
+                  });
+                  toast.success("Delete Origin Success");
+                  query.refetch();
+                }}
+              >
+                <Button variant={"link"} className="text-red-500" size={"icon"}>
+                  <Trash />
+                </Button>
+              </ConfirmPopover>
+            </div>
+          );
+        },
+      }),
+    ];
+  }, []);
+
+  const table = useReactTable({
+    data: query.data?.list || initData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <div className="flex h-full flex-col space-y-4">
@@ -51,92 +143,14 @@ export default function page() {
       </div>
       <div className="relative h-0 flex-1 overflow-y-auto">
         {query.isPending && <Spin />}
-        <Table>
-          {isEmpty(query.data?.list) && <TableCaption>No Data</TableCaption>}
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-[300px]">Link</TableHead>
-              <TableHead>JobStatus</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {query.data?.list.map((item) => {
-              return (
-                <TableRow key={item.id}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>
-                    <a href={item.link} target="_blank">
-                      <Button variant={"link"} className="p-0">
-                        {item.link}
-                      </Button>
-                    </a>
-                  </TableCell>
-                  <TableCell>{item.jobStatus}</TableCell>
-                  <TableCell>
-                    {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
-                  </TableCell>
-                  <TableCell className="space-x-2">
-                    <ConfirmPopover
-                      title="Confirm Run?"
-                      onConfirm={async () => {
-                        await runMutation.mutateAsync({
-                          id: item.id,
-                        });
-                        query.refetch();
-                      }}
-                    >
-                      <Button size={"icon"} variant={"link"}>
-                        <Play />
-                      </Button>
-                    </ConfirmPopover>
-                    <HistoryDataSheet>
-                      <Button size={"icon"} variant={"link"}>
-                        <History />
-                      </Button>
-                    </HistoryDataSheet>
-                    <OriginFormDialog
-                      id={item.id}
-                      onOk={() => {
-                        toast.success("Update Origin Success");
-                        query.refetch();
-                      }}
-                    >
-                      <Button size={"icon"} variant={"link"}>
-                        <Edit />
-                      </Button>
-                    </OriginFormDialog>
-                    <ConfirmPopover
-                      title="Delete Origin?"
-                      onConfirm={async () => {
-                        await deleteMutation.mutateAsync({
-                          id: item.id,
-                        });
-                        toast.success("Delete Origin Success");
-                        query.refetch();
-                      }}
-                    >
-                      <Button
-                        variant={"link"}
-                        className="text-red-500"
-                        size={"icon"}
-                      >
-                        <Trash />
-                      </Button>
-                    </ConfirmPopover>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <HTable {...table} />
       </div>
       <div className="flex justify-end">
-        <Pagination>
-          <PaginationContent></PaginationContent>
-        </Pagination>
+        <HPagination
+          current={current}
+          pageSize={pageSize}
+          total={query.data?.total}
+        />
       </div>
     </div>
   );
