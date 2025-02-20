@@ -1,4 +1,4 @@
-import { Home, Rss } from "lucide-react";
+import { Globe, Home, Rss } from "lucide-react";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 import { Button } from "~/components/ui/button";
@@ -29,6 +29,11 @@ const items = [
     title: "Origin",
     url: "/origin",
     icon: Rss,
+  },
+  {
+    title: "TranslateOrigin",
+    url: "/translateOrigin",
+    icon: Globe,
   },
 ];
 

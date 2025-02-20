@@ -4,10 +4,10 @@ import { db } from "~/server/db";
 import { rssOrigin } from "~/server/db/schema";
 import { rssDataQueue } from "~/server/queue/rssData";
 import { addRssOriginZObject, editRssOriginZObject } from "../schema/rssOrigin";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, authProcedure } from "../trpc";
 
 export const rssOriginRouter = createTRPCRouter({
-  page: protectedProcedure
+  page: authProcedure
     .input(
       z.object({
         current: z.number(),
@@ -27,7 +27,7 @@ export const rssOriginRouter = createTRPCRouter({
         total,
       };
     }),
-  add: protectedProcedure
+  add: authProcedure
     .input(addRssOriginZObject)
     .mutation(async ({ input, ctx }) => {
       return await db.insert(rssOrigin).values({
@@ -36,7 +36,7 @@ export const rssOriginRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
       });
     }),
-  edit: protectedProcedure
+  edit: authProcedure
     .input(editRssOriginZObject)
     .mutation(async ({ input }) => {
       return await db
@@ -47,7 +47,7 @@ export const rssOriginRouter = createTRPCRouter({
         })
         .where(eq(rssOrigin.id, input.id));
     }),
-  info: protectedProcedure
+  info: authProcedure
     .input(
       z.object({
         id: z.string().nonempty(),
@@ -58,7 +58,7 @@ export const rssOriginRouter = createTRPCRouter({
         where: eq(rssOrigin.id, input.id),
       });
     }),
-  delete: protectedProcedure
+  delete: authProcedure
     .input(
       z.object({
         id: z.string().nonempty(),
@@ -67,7 +67,7 @@ export const rssOriginRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return await db.delete(rssOrigin).where(eq(rssOrigin.id, input.id));
     }),
-  run: protectedProcedure
+  run: authProcedure
     .input(
       z.object({
         id: z.string().nonempty(),

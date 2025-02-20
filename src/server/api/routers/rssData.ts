@@ -2,10 +2,10 @@ import { count, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
 import { rssData } from "~/server/db/schema";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, authProcedure } from "../trpc";
 
 export const rssDataRouter = createTRPCRouter({
-  page: protectedProcedure
+  page: authProcedure
     .input(
       z.object({
         current: z.number().min(1),

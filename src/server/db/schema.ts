@@ -138,7 +138,7 @@ export const rssOrigin = createTable("rssOrigin", {
     .notNull()
     .$defaultFn(() => crypto.randomUUID()),
   name: varchar("name", { length: 255 }),
-  link: varchar("url", { length: 255 }).notNull(),
+  link: varchar("link", { length: 255 }).notNull(),
   jobId: varchar("job_id", { length: 255 }),
   jobStatus: varchar("job_status", { length: 255 }),
   createdById: varchar("created_by", { length: 255 })
@@ -168,4 +168,26 @@ export const rssData = createTable("rssData", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+});
+
+export const translateOrigin = createTable("translateOrigin", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: varchar("name", { length: 255 }).notNull(),
+  baseUrl: varchar("base_url", { length: 255 }),
+  apiKey: varchar("api_key", { length: 255 }).notNull(),
+  model: varchar("model", { length: 255 }).notNull(),
+  jobId: varchar("job_id", { length: 255 }),
+  jobStatus: varchar("job_status", { length: 255 }),
+  createdById: varchar("created_by", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
 });

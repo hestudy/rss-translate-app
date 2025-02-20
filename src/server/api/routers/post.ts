@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import {
   createTRPCRouter,
-  protectedProcedure,
+  authProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 import { posts } from "~/server/db/schema";
@@ -16,7 +16,7 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  create: protectedProcedure
+  create: authProcedure
     .input(z.object({ name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(posts).values({
@@ -25,7 +25,7 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getLatest: protectedProcedure.query(async ({ ctx }) => {
+  getLatest: authProcedure.query(async ({ ctx }) => {
     const post = await ctx.db.query.posts.findFirst({
       orderBy: (posts, { desc }) => [desc(posts.createdAt)],
     });
@@ -33,7 +33,7 @@ export const postRouter = createTRPCRouter({
     return post ?? null;
   }),
 
-  getSecretMessage: protectedProcedure.query(() => {
+  getSecretMessage: authProcedure.query(() => {
     return "you can now see this secret message!";
   }),
 });
