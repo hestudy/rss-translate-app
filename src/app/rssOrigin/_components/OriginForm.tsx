@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { memo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import Spin from "~/app/_components/Spin";
+import FloatSpin from "~/app/_components/FloatSpin";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -59,7 +59,7 @@ const OriginForm = memo((props: { onOk?: () => void; id?: string }) => {
         })}
         className="relative space-y-8"
       >
-        {query.isLoading && <Spin />}
+        {query.isLoading && <FloatSpin />}
         <FormField
           control={form.control}
           name="name"

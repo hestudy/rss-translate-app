@@ -9,7 +9,7 @@ import { initData } from "~/app/_common/values";
 import HPagination from "~/app/_components/HPagination";
 import HTable from "~/app/_components/HTable";
 import JsonViewDialog from "~/app/_components/JsonViewDialog";
-import Spin from "~/app/_components/Spin";
+import FloatSpin from "~/app/_components/FloatSpin";
 import { usePaginationState } from "~/app/_hooks/usePaginationState";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
@@ -72,7 +72,7 @@ const HistoryData = memo(({ id }: { id: string }) => {
   return (
     <div className="flex h-full flex-col space-y-2">
       <div className="h-0 flex-1 overflow-y-auto">
-        {query.isPending && <Spin />}
+        {query.isPending && <FloatSpin />}
         <HTable {...table} />
       </div>
       <div className="flex justify-end">

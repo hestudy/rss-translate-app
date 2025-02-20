@@ -1,9 +1,7 @@
-"use client";
-
-import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import { Edit, Trash } from "lucide-react";
-import { memo } from "react";
+import { revalidatePath } from "next/cache";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -11,53 +9,59 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { api } from "~/trpc/react";
+import { api } from "~/trpc/server";
 import ConfirmPopover from "../_components/confirmPopover";
 import Empty from "../_components/Empty";
-import FloatSpin from "../_components/FloatSpin";
-import TranslateOriginFormDialog from "./_dialog/TranslateOriginFormDialog";
+import TranslatePromptFormDialog from "./_dialog/TranslatePromptFormDialog";
 
-const page = memo(() => {
-  const query = api.translateOrigin.list.useQuery();
-
-  const deleteMutation = api.translateOrigin.delete.useMutation();
+export default async function page() {
+  const list = await api.translatePrompt.list();
 
   return (
     <div className="flex h-full flex-col space-y-2">
       <div className="flex justify-end">
-        <TranslateOriginFormDialog onOk={query.refetch}>
+        <TranslatePromptFormDialog
+          onOk={async () => {
+            "use server";
+            revalidatePath("/translatePrompt");
+          }}
+        >
           <Button>Create</Button>
-        </TranslateOriginFormDialog>
+        </TranslatePromptFormDialog>
       </div>
-      <div className="relative h-0 flex-1">
-        {query.isPending && <FloatSpin />}
-        {isEmpty(query.data) && <Empty />}
-        <div className="grid h-full grid-cols-4 gap-4 overflow-y-auto">
-          {query.data?.map((item, index) => {
+      <div className="h-0 flex-1">
+        {isEmpty(list) && <Empty />}
+        <div className="grid grid-cols-4">
+          {list.map((item, index) => {
             return (
               <div key={item.id}>
                 <Card className="group relative">
-                  <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100">
-                    <TranslateOriginFormDialog
+                  <div className="z-1 absolute right-0 top-0 opacity-0 group-hover:opacity-100">
+                    <TranslatePromptFormDialog
                       id={item.id}
-                      onOk={query.refetch}
+                      onOk={async () => {
+                        "use server";
+                        revalidatePath("/translatePrompt");
+                      }}
                     >
-                      <Button size={"icon"} variant={"ghost"}>
+                      <Button variant={"ghost"} size={"icon"}>
                         <Edit />
                       </Button>
-                    </TranslateOriginFormDialog>
+                    </TranslatePromptFormDialog>
                     <ConfirmPopover
-                      title="Delete Translate Origin?"
+                      title="Delete Prompt?"
                       onConfirm={async () => {
-                        await deleteMutation.mutateAsync({
+                        "use server";
+                        await api.translatePrompt.delete({
                           id: item.id,
                         });
-                        query.refetch();
+                        toast.success("Delete Prompt Success");
+                        revalidatePath("/translatePrompt");
                       }}
                     >
                       <Button
-                        size={"icon"}
                         variant={"ghost"}
+                        size={"icon"}
                         className="text-red-500"
                       >
                         <Trash />
@@ -68,12 +72,8 @@ const page = memo(() => {
                     <CardTitle>
                       #{index + 1} {item.name}
                     </CardTitle>
-                    <CardDescription>
-                      <div>Model: {item.model}</div>
-                      <div>
-                        CreatedAt:{" "}
-                        {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
-                      </div>
+                    <CardDescription className="whitespace-pre-line">
+                      {item.prompt}
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -84,6 +84,4 @@ const page = memo(() => {
       </div>
     </div>
   );
-});
-
-export default page;
+}

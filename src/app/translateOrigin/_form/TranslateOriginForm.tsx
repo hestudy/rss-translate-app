@@ -5,7 +5,7 @@ import { memo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import Spin from "~/app/_components/Spin";
+import FloatSpin from "~/app/_components/FloatSpin";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -87,7 +87,7 @@ const TranslateOriginForm = memo(
           })}
           className="relative space-y-2"
         >
-          {info.isLoading && <Spin />}
+          {info.isLoading && <FloatSpin />}
           <FormField
             control={form.control}
             name="name"

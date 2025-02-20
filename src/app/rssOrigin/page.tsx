@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import { Edit, History, Play, Trash } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
-import Spin from "~/app/_components/Spin";
+import FloatSpin from "~/app/_components/FloatSpin";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { initData } from "../_common/values";
@@ -142,7 +142,7 @@ export default function page() {
         </OriginFormDialog>
       </div>
       <div className="relative h-0 flex-1 overflow-y-auto">
-        {query.isPending && <Spin />}
+        {query.isPending && <FloatSpin />}
         <HTable {...table} />
       </div>
       <div className="flex justify-end">

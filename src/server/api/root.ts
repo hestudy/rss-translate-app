@@ -3,6 +3,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { rssOriginRouter } from "./routers/rssOrigin";
 import { rssDataRouter } from "./routers/rssData";
 import { translateOriginRouter } from "./routers/translateOrigin";
+import { translatePromptRouter } from "./routers/translatePrompt";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   rssOrigin: rssOriginRouter,
   rssData: rssDataRouter,
   translateOrigin: translateOriginRouter,
+  translatePrompt: translatePromptRouter,
 });
 
 // export type definition of API
