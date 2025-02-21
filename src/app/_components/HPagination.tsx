@@ -4,7 +4,7 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
+  PaginationLinkA,
 } from "~/components/ui/pagination";
 
 const HPagination = memo(
@@ -30,7 +30,7 @@ const HPagination = memo(
           {items.map((item) => {
             return (
               <PaginationItem key={item}>
-                <PaginationLink
+                <PaginationLinkA
                   className="cursor-pointer"
                   isActive={item === current}
                   onClick={() => {
@@ -38,7 +38,7 @@ const HPagination = memo(
                   }}
                 >
                   {item}
-                </PaginationLink>
+                </PaginationLinkA>
               </PaginationItem>
             );
           })}

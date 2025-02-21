@@ -1,6 +1,13 @@
+import { ceil } from "lodash";
 import { revalidatePath } from "next/cache";
 import { getPathname } from "~/app/_common/getPathname";
 import { Button } from "~/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "~/components/ui/pagination";
 import { api } from "~/trpc/server";
 import RssTranslateFormDialog from "./_dialog/RssTranslateFormDialog";
 import RssTranslateTable from "./_table/table";
@@ -39,7 +46,24 @@ export default async function page({
           }}
         />
       </div>
-      <div></div>
+      <div>
+        <Pagination>
+          <PaginationContent>
+            {Array.from({ length: ceil(query.total / 10) }).map((_, index) => {
+              return (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    href={`/rssTranslate/${index + 1}`}
+                    isActive={index + 1 === Number(current)}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }
