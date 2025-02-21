@@ -137,7 +137,7 @@ export const rssOrigin = createTable("rssOrigin", {
     .primaryKey()
     .notNull()
     .$defaultFn(() => crypto.randomUUID()),
-  name: varchar("name", { length: 255 }),
+  name: varchar("name", { length: 255 }).notNull(),
   link: varchar("link", { length: 255 }).notNull(),
   jobId: varchar("job_id", { length: 255 }),
   jobStatus: varchar("job_status", { length: 255 }),
@@ -179,8 +179,6 @@ export const translateOrigin = createTable("translateOrigin", {
   baseUrl: varchar("base_url", { length: 255 }),
   apiKey: varchar("api_key", { length: 255 }).notNull(),
   model: varchar("model", { length: 255 }).notNull(),
-  jobId: varchar("job_id", { length: 255 }),
-  jobStatus: varchar("job_status", { length: 255 }),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),
@@ -202,6 +200,52 @@ export const translatePrompt = createTable("translatePrompt", {
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
+});
+
+export const rssTranslate = createTable("rssTranslate", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
+  rssOrigin: varchar("rss_origin", { length: 255 })
+    .notNull()
+    .references(() => rssOrigin.id),
+  translateOrigin: varchar("translate_origin", { length: 255 })
+    .notNull()
+    .references(() => translateOrigin.id),
+  translatePrompt: varchar("translate_prompt", { length: 255 })
+    .notNull()
+    .references(() => translatePrompt.id),
+  createdById: varchar("created_by", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  jobId: varchar("job_id", { length: 255 }),
+  jobStatus: varchar("job_status", { length: 255 }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
+});
+
+export const rssTranslateData = createTable("rssTranslateData", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
+  data: json("data"),
+  rssTranslateId: varchar("rss_translate_id", { length: 255 })
+    .notNull()
+    .references(() => rssTranslate.id),
+  jobId: varchar("job_id", { length: 255 }),
+  jobStatus: varchar("job_status", { length: 255 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

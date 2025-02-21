@@ -4,7 +4,7 @@ import { db } from "~/server/db";
 import { rssOrigin } from "~/server/db/schema";
 import { rssDataQueue } from "~/server/queue/rssData";
 import { addRssOriginZObject, editRssOriginZObject } from "../schema/rssOrigin";
-import { createTRPCRouter, authProcedure } from "../trpc";
+import { authProcedure, createTRPCRouter } from "../trpc";
 
 export const rssOriginRouter = createTRPCRouter({
   page: authProcedure
@@ -91,4 +91,7 @@ export const rssOriginRouter = createTRPCRouter({
           .where(eq(rssOrigin.id, input.id));
       }
     }),
+  list: authProcedure.query(async () => {
+    return await db.query.rssOrigin.findMany();
+  }),
 });

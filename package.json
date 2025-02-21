@@ -43,6 +43,7 @@
     "bullmq": "^5.41.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "1.0.0",
     "dayjs": "^1.11.13",
     "drizzle-orm": "^0.33.0",
     "drizzle-seed": "^0.3.1",
