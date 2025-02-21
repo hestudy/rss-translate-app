@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Trash } from "lucide-react";
+import { Edit, Play, Trash } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import ConfirmPopover from "~/app/_components/confirmPopover";
@@ -9,6 +9,7 @@ import { DataTable } from "~/app/_components/DataTable";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { api as sapi } from "~/trpc/server";
+import RssTranslateFormDialog from "../_dialog/RssTranslateFormDialog";
 
 export default function RssTranslateTable(props: {
   data: any;
@@ -38,6 +39,17 @@ export default function RssTranslateTable(props: {
         cell(cellProps) {
           return (
             <div>
+              <Button variant={"ghost"} size={"icon"}>
+                <Play />
+              </Button>
+              <RssTranslateFormDialog
+                id={cellProps.row.original.rssTranslate.id}
+                onOk={props.onOk}
+              >
+                <Button variant={"ghost"} size={"icon"}>
+                  <Edit />
+                </Button>
+              </RssTranslateFormDialog>
               <ConfirmPopover
                 title="Delete RssTranslate?"
                 onConfirm={async () => {

@@ -31,7 +31,7 @@ export default async function page() {
       </div>
       <div className="h-0 flex-1">
         {isEmpty(list) && <Empty />}
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-4 gap-4">
           {list.map((item, index) => {
             return (
               <div key={item.id}>

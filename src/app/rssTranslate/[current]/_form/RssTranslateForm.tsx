@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import FloatSpin from "~/app/_components/FloatSpin";
 import Select from "~/app/_components/Select";
 import { Button } from "~/components/ui/button";
 import {
@@ -21,9 +22,10 @@ const schema = z.object({
   rssOrigin: z.string().nonempty(),
   translateOrigin: z.string().nonempty(),
   translatePrompt: z.string().nonempty(),
+  id: z.string().optional(),
 });
 
-const RssTranslateForm = memo((props: { onOk?: () => void }) => {
+const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
   const form = useForm<z.infer<typeof schema>>({
     defaultValues: {},
     resolver: zodResolver(schema),
@@ -31,17 +33,43 @@ const RssTranslateForm = memo((props: { onOk?: () => void }) => {
   });
 
   const mutation = api.rssTranslate.create.useMutation();
+  const updateMutation = api.rssTranslate.update.useMutation();
+
+  const query = api.rssTranslate.info.useQuery(
+    {
+      id: props.id!,
+    },
+    {
+      enabled: !!props.id,
+      staleTime: 0,
+    },
+  );
+
+  useEffect(() => {
+    if (query.data) {
+      form.reset(query.data);
+    }
+  }, [query.data]);
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(async (values) => {
-          await mutation.mutateAsync(values);
-          toast.success("Create RssTranslate Success");
+          if (!props.id) {
+            await mutation.mutateAsync(values);
+            toast.success("Create RssTranslate Success");
+          } else {
+            await updateMutation.mutateAsync({
+              ...values,
+              id: props.id,
+            });
+            toast.success("Update RssTranslate Success");
+          }
           props.onOk?.();
         })}
-        className="space-y-2"
+        className="relative space-y-2"
       >
+        {query.isLoading && <FloatSpin />}
         <FormField
           control={form.control}
           name="rssOrigin"
