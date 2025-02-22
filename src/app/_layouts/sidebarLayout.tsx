@@ -32,7 +32,7 @@ const items = [
   },
   {
     title: "RssOrigin",
-    url: "/rssOrigin",
+    url: "/rssOrigin/1",
     icon: Rss,
   },
   {

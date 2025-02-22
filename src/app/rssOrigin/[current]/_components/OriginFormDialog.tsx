@@ -1,3 +1,5 @@
+"use client";
+
 import { memo, PropsWithChildren, useState } from "react";
 import {
   Dialog,
