@@ -1,8 +1,7 @@
-"use client";
-
 import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import { Edit, Trash } from "lucide-react";
+import { revalidatePath } from "next/cache";
 import { memo } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -11,36 +10,42 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { api } from "~/trpc/react";
+import { api } from "~/trpc/server";
+import { getPathname } from "../_common/getPathname";
 import ConfirmPopover from "../_components/confirmPopover";
 import Empty from "../_components/Empty";
-import FloatSpin from "../_components/FloatSpin";
 import TranslateOriginFormDialog from "./_dialog/TranslateOriginFormDialog";
 
-const page = memo(() => {
-  const query = api.translateOrigin.list.useQuery();
-
-  const deleteMutation = api.translateOrigin.delete.useMutation();
+const page = memo(async () => {
+  const list = await api.translateOrigin.list();
+  const pathname = await getPathname();
 
   return (
     <div className="flex h-full flex-col space-y-2">
       <div className="flex justify-end">
-        <TranslateOriginFormDialog onOk={query.refetch}>
+        <TranslateOriginFormDialog
+          onOk={async () => {
+            "use server";
+            revalidatePath(pathname || "");
+          }}
+        >
           <Button>Create</Button>
         </TranslateOriginFormDialog>
       </div>
       <div className="relative h-0 flex-1">
-        {query.isPending && <FloatSpin />}
-        {isEmpty(query.data) && <Empty />}
+        {isEmpty(list) && <Empty />}
         <div className="grid h-full grid-cols-4 gap-4 overflow-y-auto">
-          {query.data?.map((item, index) => {
+          {list?.map((item, index) => {
             return (
               <div key={item.id}>
                 <Card className="group relative">
                   <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100">
                     <TranslateOriginFormDialog
                       id={item.id}
-                      onOk={query.refetch}
+                      onOk={async () => {
+                        "use server";
+                        revalidatePath(pathname || "");
+                      }}
                     >
                       <Button size={"icon"} variant={"ghost"}>
                         <Edit />
@@ -49,10 +54,11 @@ const page = memo(() => {
                     <ConfirmPopover
                       title="Delete Translate Origin?"
                       onConfirm={async () => {
-                        await deleteMutation.mutateAsync({
+                        "use server";
+                        await api.translateOrigin.delete({
                           id: item.id,
                         });
-                        query.refetch();
+                        revalidatePath(pathname || "");
                       }}
                     >
                       <Button

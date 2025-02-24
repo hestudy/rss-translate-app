@@ -1,7 +1,6 @@
 import { isEmpty } from "lodash";
 import { Edit, Trash } from "lucide-react";
 import { revalidatePath } from "next/cache";
-import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -55,7 +54,6 @@ export default async function page() {
                         await api.translatePrompt.delete({
                           id: item.id,
                         });
-                        toast.success("Delete Prompt Success");
                         revalidatePath("/translatePrompt");
                       }}
                     >
