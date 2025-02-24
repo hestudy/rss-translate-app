@@ -20,7 +20,8 @@ export default function RssTranslateTable(props: {
   data: any;
   onOk?: () => void;
 }) {
-  const deleteMutatio = api.rssTranslate.delete.useMutation();
+  const deleteMutation = api.rssTranslate.delete.useMutation();
+  const runMutation = api.rssTranslate.run.useMutation();
 
   const columns = useMemo(() => {
     return [
@@ -33,6 +34,9 @@ export default function RssTranslateTable(props: {
       columnHelper.accessor("translatePrompt.name", {
         header: "TranslatePrompt",
       }),
+      columnHelper.accessor("rssTranslate.language", {
+        header: "TranslateLanguage",
+      }),
       columnHelper.accessor("rssTranslate.jobStatus", {
         header: "JobState",
       }),
@@ -42,9 +46,19 @@ export default function RssTranslateTable(props: {
         cell(cellProps) {
           return (
             <div>
-              <Button variant={"ghost"} size={"icon"}>
-                <Play />
-              </Button>
+              <ConfirmPopover
+                title="Confirm Run?"
+                onConfirm={async () => {
+                  await runMutation.mutateAsync({
+                    id: cellProps.row.original.rssTranslate.id,
+                  });
+                  props.onOk?.();
+                }}
+              >
+                <Button variant={"ghost"} size={"icon"}>
+                  <Play />
+                </Button>
+              </ConfirmPopover>
               <RssTranslateFormDialog
                 id={cellProps.row.original.rssTranslate.id}
                 onOk={props.onOk}
@@ -56,7 +70,7 @@ export default function RssTranslateTable(props: {
               <ConfirmPopover
                 title="Delete RssTranslate?"
                 onConfirm={async () => {
-                  await deleteMutatio.mutateAsync({
+                  await deleteMutation.mutateAsync({
                     id: cellProps.row.original.rssTranslate.id,
                   });
                   toast.success("Delete RssTranslate Success");

@@ -222,6 +222,7 @@ export const rssTranslate = createTable("rssTranslate", {
   translatePrompt: varchar("translate_prompt", { length: 255 })
     .notNull()
     .references(() => translatePrompt.id),
+  language: varchar("language", { length: 255 }).notNull(),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),
@@ -240,12 +241,16 @@ export const rssTranslateData = createTable("rssTranslateData", {
     .primaryKey()
     .notNull()
     .$defaultFn(() => crypto.randomUUID()),
+  feed: json("feed"),
   data: json("data"),
   rssTranslateId: varchar("rss_translate_id", { length: 255 })
     .notNull()
     .references(() => rssTranslate.id),
   jobId: varchar("job_id", { length: 255 }),
   jobStatus: varchar("job_status", { length: 255 }),
+  createdById: varchar("created_by", { length: 255 })
+    .notNull()
+    .references(() => users.id),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

@@ -1,5 +1,5 @@
 import { Queue, Worker } from "bullmq";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { User } from "next-auth";
 import Parser from "rss-parser";
 import { env } from "~/env";
@@ -46,7 +46,12 @@ worker.on("progress", async (job) => {
     .set({
       jobStatus: "progress",
     })
-    .where(eq(rssOrigin.id, job.data.origin.id));
+    .where(
+      and(
+        eq(rssOrigin.id, job.data.origin.id),
+        eq(rssOrigin.jobId, job.id || ""),
+      ),
+    );
 });
 
 worker.on("completed", async (job) => {
@@ -56,7 +61,12 @@ worker.on("completed", async (job) => {
     .set({
       jobStatus: "completed",
     })
-    .where(eq(rssOrigin.id, job.data.origin.id));
+    .where(
+      and(
+        eq(rssOrigin.id, job.data.origin.id),
+        eq(rssOrigin.jobId, job.id || ""),
+      ),
+    );
 });
 
 worker.on("failed", async (job, err) => {
@@ -67,6 +77,11 @@ worker.on("failed", async (job, err) => {
       .set({
         jobStatus: "failed",
       })
-      .where(eq(rssOrigin.id, job.data.origin.id));
+      .where(
+        and(
+          eq(rssOrigin.id, job.data.origin.id),
+          eq(rssOrigin.jobId, job.id || ""),
+        ),
+      );
   }
 });

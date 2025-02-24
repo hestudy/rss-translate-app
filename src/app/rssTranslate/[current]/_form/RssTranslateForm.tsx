@@ -16,18 +16,22 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 
 const schema = z.object({
   rssOrigin: z.string().nonempty(),
   translateOrigin: z.string().nonempty(),
   translatePrompt: z.string().nonempty(),
+  language: z.string().nonempty(),
   id: z.string().optional(),
 });
 
 const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
   const form = useForm<z.infer<typeof schema>>({
-    defaultValues: {},
+    defaultValues: {
+      language: "",
+    },
     resolver: zodResolver(schema),
     mode: "onChange",
   });
@@ -148,6 +152,21 @@ const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
                       })}
                     />
                   </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="language"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Translate Language</FormLabel>
+                <FormControl>
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

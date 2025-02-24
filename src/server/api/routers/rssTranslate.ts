@@ -7,6 +7,8 @@ import {
   translateOrigin,
   translatePrompt,
 } from "~/server/db/schema";
+import { rssTranslateQueue } from "~/server/queue/rssTranslate";
+import { api } from "~/trpc/server";
 import { authProcedure, createTRPCRouter } from "../trpc";
 
 export const rssTranslateRouter = createTRPCRouter({
@@ -16,6 +18,7 @@ export const rssTranslateRouter = createTRPCRouter({
         rssOrigin: z.string().nonempty(),
         translateOrigin: z.string().nonempty(),
         translatePrompt: z.string().nonempty(),
+        language: z.string().nonempty(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -41,6 +44,7 @@ export const rssTranslateRouter = createTRPCRouter({
         rssOrigin: z.string().nonempty(),
         translateOrigin: z.string().nonempty(),
         translatePrompt: z.string().nonempty(),
+        language: z.string().nonempty(),
         id: z.string().nonempty(),
       }),
     )
@@ -87,5 +91,64 @@ export const rssTranslateRouter = createTRPCRouter({
         list,
         total: result?.count ?? 0,
       };
+    }),
+  run: authProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const result = (
+        await db
+          .select()
+          .from(rssTranslate)
+          .where(eq(rssTranslate.id, input.id))
+          .leftJoin(rssOrigin, eq(rssTranslate.rssOrigin, rssOrigin.id))
+          .leftJoin(
+            translateOrigin,
+            eq(rssTranslate.translateOrigin, translateOrigin.id),
+          )
+          .leftJoin(
+            translatePrompt,
+            eq(rssTranslate.translatePrompt, translatePrompt.id),
+          )
+      ).at(0);
+      if (result) {
+        const job = await rssTranslateQueue.add("rssTranslate", {
+          rssTranslate: result,
+          user: ctx.session.user,
+        });
+        await db
+          .update(rssTranslate)
+          .set({
+            jobId: job.id,
+            jobStatus: await job.getState(),
+          })
+          .where(eq(rssTranslate.id, input.id));
+      }
+    }),
+  detail: authProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .query(async ({ input }) => {
+      return (
+        await db
+          .select()
+          .from(rssTranslate)
+          .where(eq(rssTranslate.id, input.id))
+          .leftJoin(rssOrigin, eq(rssTranslate.rssOrigin, rssOrigin.id))
+          .leftJoin(
+            translateOrigin,
+            eq(rssTranslate.translateOrigin, translateOrigin.id),
+          )
+          .leftJoin(
+            translatePrompt,
+            eq(rssTranslate.translatePrompt, translatePrompt.id),
+          )
+      ).at(0);
     }),
 });
