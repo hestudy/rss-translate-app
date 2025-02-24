@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { Edit, Play, Trash } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
@@ -11,29 +11,32 @@ import { api } from "~/trpc/react";
 import { api as sapi } from "~/trpc/server";
 import RssTranslateFormDialog from "../_dialog/RssTranslateFormDialog";
 
+const columnHelper =
+  createColumnHelper<
+    Awaited<ReturnType<typeof sapi.rssTranslate.page>>["list"][0]
+  >();
+
 export default function RssTranslateTable(props: {
   data: any;
   onOk?: () => void;
 }) {
   const deleteMutatio = api.rssTranslate.delete.useMutation();
 
-  const columns = useMemo<
-    ColumnDef<Awaited<ReturnType<typeof sapi.rssTranslate.page>>["list"][0]>[]
-  >(() => {
+  const columns = useMemo(() => {
     return [
-      {
-        accessorKey: "rssOrigin.name",
+      columnHelper.accessor("rssOrigin.name", {
         header: "RssOrigin",
-      },
-      {
-        accessorKey: "translateOrigin.name",
+      }),
+      columnHelper.accessor("translateOrigin.name", {
         header: "TranslateOrigin",
-      },
-      {
-        accessorKey: "translatePrompt.name",
+      }),
+      columnHelper.accessor("translatePrompt.name", {
         header: "TranslatePrompt",
-      },
-      {
+      }),
+      columnHelper.accessor("rssTranslate.jobStatus", {
+        header: "JobState",
+      }),
+      columnHelper.display({
         id: "action",
         header: "Action",
         cell(cellProps) {
@@ -71,7 +74,7 @@ export default function RssTranslateTable(props: {
             </div>
           );
         },
-      },
+      }),
     ];
   }, [props.onOk]);
 

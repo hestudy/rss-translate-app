@@ -18,37 +18,45 @@ import {
 } from "~/components/ui/sidebar";
 import { auth } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
+import { getPathname } from "../_common/getPathname";
 
 const items = [
   {
     title: "Home",
     url: "/",
     icon: Home,
+    isActive: (pathname: string) => pathname === "/",
   },
   {
     title: "RssTranslate",
     url: "/rssTranslate/1",
     icon: BookType,
+    isActive: (pathname: string) => pathname.startsWith("/rssTranslate"),
   },
   {
     title: "RssOrigin",
     url: "/rssOrigin/1",
     icon: Rss,
+    isActive: (pathname: string) => pathname.startsWith("/rssOrigin"),
   },
   {
     title: "TranslateOrigin",
     url: "/translateOrigin",
     icon: Globe,
+    isActive: (pathname: string) => pathname === "/translateOrigin",
   },
   {
     title: "TranslatePrompt",
     url: "/translatePrompt",
     icon: Terminal,
+    isActive: (pathname: string) => pathname === "/translatePrompt",
   },
 ];
 
 const SidebarLayout = async (props: PropsWithChildren) => {
   const session = await auth();
+  const pathname = await getPathname();
+
   return (
     <HydrateClient>
       <main className="h-screen">
@@ -73,7 +81,10 @@ const SidebarLayout = async (props: PropsWithChildren) => {
                     <SidebarMenu>
                       {items.map((item) => (
                         <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton asChild>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={item.isActive(pathname || "")}
+                          >
                             <a href={item.url}>
                               <item.icon />
                               <span>{item.title}</span>
