@@ -152,7 +152,7 @@ export const rssOrigin = createTable("rssOrigin", {
   ),
 });
 
-export const rssData = createTable("rssData", {
+export const translateData = createTable("rssData", {
   id: varchar("id", { length: 255 })
     .primaryKey()
     .notNull()

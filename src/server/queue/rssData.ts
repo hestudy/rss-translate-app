@@ -4,7 +4,7 @@ import { User } from "next-auth";
 import Parser from "rss-parser";
 import { env } from "~/env";
 import { db } from "../db";
-import { rssData, rssOrigin } from "../db/schema";
+import { translateData, rssOrigin } from "../db/schema";
 
 const parser = new Parser();
 
@@ -25,7 +25,7 @@ const worker = new Worker<{
   "rssData",
   async (job) => {
     const feed = await parser.parseURL(job.data.origin.link);
-    await db.insert(rssData).values({
+    await db.insert(translateData).values({
       data: feed,
       rssOriginId: job.data.origin.id,
       createdById: job.data.user.id!,

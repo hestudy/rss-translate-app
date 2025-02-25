@@ -1,7 +1,7 @@
 import { count, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
-import { rssData } from "~/server/db/schema";
+import { translateData } from "~/server/db/schema";
 import { createTRPCRouter, authProcedure } from "../trpc";
 
 export const rssDataRouter = createTRPCRouter({
@@ -14,18 +14,18 @@ export const rssDataRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const list = await db.query.rssData.findMany({
+      const list = await db.query.translateData.findMany({
         limit: input.pageSize,
         offset: (input.current - 1) * input.pageSize,
-        where: eq(rssData.rssOriginId, input.rssOrigin),
+        where: eq(translateData.rssOriginId, input.rssOrigin),
         orderBy: (rssData, { desc }) => [desc(rssData.createdAt)],
       });
       const res = await db
         .select({
           count: count(),
         })
-        .from(rssData)
-        .where(eq(rssData.rssOriginId, input.rssOrigin));
+        .from(translateData)
+        .where(eq(translateData.rssOriginId, input.rssOrigin));
       const total = res.at(0)?.count;
 
       return {
