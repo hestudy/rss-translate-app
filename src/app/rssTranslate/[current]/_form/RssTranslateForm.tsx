@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { memo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { type z } from "zod";
 import FloatSpin from "~/app/_components/FloatSpin";
 import Select from "~/app/_components/Select";
 import { Button } from "~/components/ui/button";
@@ -17,22 +17,17 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { createRssTranslateSchema } from "~/server/api/schema/rssTranslate";
 import { api } from "~/trpc/react";
 
-const schema = z.object({
-  rssOrigin: z.string().nonempty(),
-  translateOrigin: z.string().nonempty(),
-  translatePrompt: z.string().nonempty(),
-  language: z.string().nonempty(),
-  id: z.string().optional(),
-});
-
 const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof createRssTranslateSchema>>({
     defaultValues: {
-      language: "",
+      language: "en",
+      enabled: true,
+      cron: "0 * * * *",
     },
-    resolver: zodResolver(schema),
+    resolver: zodResolver(createRssTranslateSchema),
     mode: "onChange",
   });
 

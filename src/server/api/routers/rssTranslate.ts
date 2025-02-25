@@ -9,19 +9,14 @@ import {
 } from "~/server/db/schema";
 import { rssTranslateQueue } from "~/server/queue/rssTranslate";
 import { authProcedure, createTRPCRouter } from "../trpc";
+import {
+  createRssTranslateSchema,
+  updateRssTranslateSchema,
+} from "../schema/rssTranslate";
 
 export const rssTranslateRouter = createTRPCRouter({
   create: authProcedure
-    .input(
-      z.object({
-        rssOrigin: z.string().nonempty(),
-        translateOrigin: z.string().nonempty(),
-        translatePrompt: z.string().nonempty(),
-        language: z.string().nonempty(),
-        enabled: z.boolean(),
-        cron: z.string().nonempty(),
-      }),
-    )
+    .input(createRssTranslateSchema)
     .mutation(async ({ input, ctx }) => {
       return await db.insert(rssTranslate).values({
         ...input,
@@ -40,15 +35,7 @@ export const rssTranslateRouter = createTRPCRouter({
       });
     }),
   update: authProcedure
-    .input(
-      z.object({
-        rssOrigin: z.string().nonempty(),
-        translateOrigin: z.string().nonempty(),
-        translatePrompt: z.string().nonempty(),
-        language: z.string().nonempty(),
-        id: z.string().nonempty(),
-      }),
-    )
+    .input(updateRssTranslateSchema)
     .mutation(async ({ input }) => {
       const { id, ...props } = input;
       return await db
