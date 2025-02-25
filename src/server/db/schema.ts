@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   json,
@@ -223,6 +224,8 @@ export const rssTranslate = createTable("rssTranslate", {
     .notNull()
     .references(() => translatePrompt.id),
   language: varchar("language", { length: 255 }).notNull(),
+  cron: varchar("cron", { length: 255 }).notNull(),
+  enabled: boolean("enabled").notNull(),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),

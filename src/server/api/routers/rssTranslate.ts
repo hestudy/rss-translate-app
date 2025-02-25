@@ -8,7 +8,6 @@ import {
   translatePrompt,
 } from "~/server/db/schema";
 import { rssTranslateQueue } from "~/server/queue/rssTranslate";
-import { api } from "~/trpc/server";
 import { authProcedure, createTRPCRouter } from "../trpc";
 
 export const rssTranslateRouter = createTRPCRouter({
@@ -19,6 +18,8 @@ export const rssTranslateRouter = createTRPCRouter({
         translateOrigin: z.string().nonempty(),
         translatePrompt: z.string().nonempty(),
         language: z.string().nonempty(),
+        enabled: z.boolean(),
+        cron: z.string().nonempty(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
