@@ -1,7 +1,7 @@
 "use client";
 
 import { useBoolean } from "ahooks";
-import { memo, PropsWithChildren } from "react";
+import { memo, type PropsWithChildren } from "react";
 import {
   Dialog,
   DialogContent,

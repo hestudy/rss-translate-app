@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memo, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import FloatSpin from "~/app/_components/FloatSpin";
 import { Button } from "~/components/ui/button";
 import {

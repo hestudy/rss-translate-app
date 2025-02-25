@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { api } from "~/trpc/server";
 import Rss from "rss";
-import Parser from "rss-parser";
+import type Parser from "rss-parser";
 
 export const GET = async (
   req: NextRequest,

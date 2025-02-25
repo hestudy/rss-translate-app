@@ -1,7 +1,7 @@
 "use client";
 
 import { useRequest } from "ahooks";
-import { memo, PropsWithChildren, ReactNode, useState } from "react";
+import { memo, type PropsWithChildren, type ReactNode, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Popover,

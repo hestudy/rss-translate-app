@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, PropsWithChildren, useState } from "react";
+import { memo, type PropsWithChildren, useState } from "react";
 import {
   Dialog,
   DialogContent,

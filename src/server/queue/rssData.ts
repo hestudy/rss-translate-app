@@ -1,6 +1,6 @@
 import { Queue, Worker } from "bullmq";
 import { and, eq } from "drizzle-orm";
-import { User } from "next-auth";
+import { type User } from "next-auth";
 import Parser from "rss-parser";
 import { env } from "~/env";
 import { db } from "../db";

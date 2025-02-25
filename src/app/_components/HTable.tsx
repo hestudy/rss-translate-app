@@ -1,4 +1,4 @@
-import { flexRender, Table as TableType } from "@tanstack/react-table";
+import { flexRender, type Table as TableType } from "@tanstack/react-table";
 import { memo } from "react";
 import {
   Table,

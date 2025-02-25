@@ -8,7 +8,7 @@ import ConfirmPopover from "~/app/_components/confirmPopover";
 import { DataTable } from "~/app/_components/DataTable";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
-import { api as sapi } from "~/trpc/server";
+import { type api as sapi } from "~/trpc/server";
 import HistoryDataSheet from "../_components/HistoryDataSheet";
 import OriginFormDialog from "../_components/OriginFormDialog";
 
