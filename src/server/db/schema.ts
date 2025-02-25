@@ -257,7 +257,24 @@ export const rssTranslateData = createTable("rssTranslateData", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-    () => new Date(),
-  ),
+});
+
+export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
+  origin: json("origin"),
+  data: json("data"),
+  rssTranslateDataId: varchar("rss_translate_data_id", { length: 255 })
+    .notNull()
+    .references(() => rssTranslateData.id),
+  jobId: varchar("job_id", { length: 255 }),
+  jobStatus: varchar("job_status", { length: 255 }),
+  createdById: varchar("created_by", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
