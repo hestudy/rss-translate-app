@@ -30,7 +30,7 @@ const OriginForm = memo((props: { onOk?: () => void; id?: string }) => {
 
   const query = api.rssOrigin.info.useQuery(
     { id: props.id! },
-    { enabled: !!props.id },
+    { enabled: !!props.id, staleTime: 0 },
   );
 
   useEffect(() => {
@@ -55,7 +55,6 @@ const OriginForm = memo((props: { onOk?: () => void; id?: string }) => {
               id: props.id,
               ...values,
             });
-            query.refetch();
           }
           props.onOk?.();
         })}

@@ -23,7 +23,7 @@ export const translate = async (props: {
   const split = await textSplit(props.content);
   const promptTemplate = PromptTemplate.fromTemplate(props.prompt);
   const translateList: string[] = [];
-  for await (const item of split) {
+  for (const item of split) {
     console.log("content:", item.pageContent);
     const prompt = await promptTemplate.invoke({
       content: item.pageContent,

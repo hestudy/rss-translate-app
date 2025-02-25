@@ -4,8 +4,8 @@ export const usePaginationState = (props?: {
   defaultCurrent?: number;
   defaultPageSize?: number;
 }) => {
-  const [current, setCurrent] = useState(props?.defaultCurrent || 1);
-  const [pageSize, setPageSize] = useState(props?.defaultPageSize || 10);
+  const [current, setCurrent] = useState(props?.defaultCurrent ?? 1);
+  const [pageSize, setPageSize] = useState(props?.defaultPageSize ?? 10);
   return {
     current,
     pageSize,

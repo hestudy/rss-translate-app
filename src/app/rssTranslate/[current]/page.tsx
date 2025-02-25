@@ -25,7 +25,7 @@ export default async function page({
         <RssTranslateFormDialog
           onOk={async () => {
             "use server";
-            revalidatePath(pathname || "");
+            revalidatePath(pathname ?? "");
           }}
         >
           <Button>Create</Button>
@@ -36,7 +36,7 @@ export default async function page({
           data={query.list}
           onOk={async () => {
             "use server";
-            revalidatePath(pathname || "");
+            revalidatePath(pathname ?? "");
           }}
         />
       </div>

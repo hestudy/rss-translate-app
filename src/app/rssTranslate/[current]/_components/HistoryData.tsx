@@ -67,7 +67,7 @@ const HistoryData = memo(({ id }: { id: string }) => {
   }, []);
 
   const table = useReactTable({
-    data: query.data?.list || initData,
+    data: query.data?.list ?? initData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });

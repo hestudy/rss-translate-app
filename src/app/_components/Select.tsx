@@ -31,7 +31,7 @@ const Select = memo(
     const [open, setOpen] = useState(false);
     const [currentValue, setCurrentValue] = useState("");
 
-    const value = props.value || currentValue;
+    const value = props.value ?? currentValue;
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -93,5 +93,7 @@ const Select = memo(
     );
   },
 );
+
+Select.displayName = "Select";
 
 export default Select;

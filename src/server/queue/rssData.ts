@@ -39,48 +39,45 @@ const worker = new Worker<{
   },
 );
 
-worker.on("progress", async (job) => {
-  console.log(`${job.id} has progress ${job.progress}`);
-  await db
-    .update(rssOrigin)
+worker.on("progress", (job) => {
+  console.log(`${job.id} has progress ${job.progress.toString()}`);
+  db.update(rssOrigin)
     .set({
       jobStatus: "progress",
     })
     .where(
       and(
         eq(rssOrigin.id, job.data.origin.id),
-        eq(rssOrigin.jobId, job.id || ""),
+        eq(rssOrigin.jobId, job.id ?? ""),
       ),
     );
 });
 
-worker.on("completed", async (job) => {
+worker.on("completed", (job) => {
   console.log(`${job.id} has completed!`);
-  await db
-    .update(rssOrigin)
+  db.update(rssOrigin)
     .set({
       jobStatus: "completed",
     })
     .where(
       and(
         eq(rssOrigin.id, job.data.origin.id),
-        eq(rssOrigin.jobId, job.id || ""),
+        eq(rssOrigin.jobId, job.id ?? ""),
       ),
     );
 });
 
-worker.on("failed", async (job, err) => {
+worker.on("failed", (job, err) => {
   console.log(`${job?.id} has failed with ${err.message}`);
   if (job) {
-    await db
-      .update(rssOrigin)
+    db.update(rssOrigin)
       .set({
         jobStatus: "failed",
       })
       .where(
         and(
           eq(rssOrigin.id, job.data.origin.id),
-          eq(rssOrigin.jobId, job.id || ""),
+          eq(rssOrigin.jobId, job.id ?? ""),
         ),
       );
   }

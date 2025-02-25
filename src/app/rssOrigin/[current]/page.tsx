@@ -25,7 +25,7 @@ export default async function page({
         <OriginFormDialog
           onOk={async () => {
             "use server";
-            revalidatePath(pathname || "");
+            revalidatePath(pathname ?? "");
           }}
         >
           <Button>Create</Button>
@@ -36,7 +36,7 @@ export default async function page({
           data={query.list}
           onOk={async () => {
             "use server";
-            revalidatePath(pathname || "");
+            revalidatePath(pathname ?? "");
           }}
         />
       </div>
@@ -44,7 +44,7 @@ export default async function page({
         <SPagination
           current={Number(current)}
           pageSize={10}
-          total={query.total || 0}
+          total={query.total ?? 0}
           href={(index) => `/rssOrigin/${index}`}
         />
       </div>

@@ -27,12 +27,12 @@ const worker = new Worker<{
   "rssTranslate",
   async (job) => {
     const feed = await parser.parseURL(
-      job.data.rssTranslate?.rssOrigin?.link || "",
+      job.data.rssTranslate?.rssOrigin?.link ?? "",
     );
     const result = await db
       .insert(rssTranslateData)
       .values({
-        rssTranslateId: job.data.rssTranslate?.rssTranslate.id!,
+        rssTranslateId: job.data.rssTranslate?.rssTranslate.id ?? "",
         jobId: job.id,
         jobStatus: await job.getState(),
         feed,
@@ -40,22 +40,22 @@ const worker = new Worker<{
       })
       .returning();
     const list: (typeof feed)["items"] = [];
-    for await (const item of feed.items) {
+    for (const item of feed.items) {
       const title = await translate({
-        content: item.title || "",
-        apiKey: job.data.rssTranslate?.translateOrigin?.apiKey!,
-        baseUrl: job.data.rssTranslate?.translateOrigin?.baseUrl!,
-        model: job.data.rssTranslate?.translateOrigin?.model!,
-        language: job.data.rssTranslate?.rssTranslate?.language!,
-        prompt: job.data.rssTranslate?.translatePrompt?.prompt!,
+        content: item.title ?? "",
+        apiKey: job.data.rssTranslate?.translateOrigin?.apiKey ?? "",
+        baseUrl: job.data.rssTranslate?.translateOrigin?.baseUrl ?? "",
+        model: job.data.rssTranslate?.translateOrigin?.model ?? "",
+        language: job.data.rssTranslate?.rssTranslate?.language ?? "",
+        prompt: job.data.rssTranslate?.translatePrompt?.prompt ?? "",
       });
       const content = await translate({
-        content: item.content || "",
-        apiKey: job.data.rssTranslate?.translateOrigin?.apiKey!,
-        baseUrl: job.data.rssTranslate?.translateOrigin?.baseUrl!,
-        model: job.data.rssTranslate?.translateOrigin?.model!,
-        language: job.data.rssTranslate?.rssTranslate?.language!,
-        prompt: job.data.rssTranslate?.translatePrompt?.prompt!,
+        content: item.content ?? "",
+        apiKey: job.data.rssTranslate?.translateOrigin?.apiKey ?? "",
+        baseUrl: job.data.rssTranslate?.translateOrigin?.baseUrl ?? "",
+        model: job.data.rssTranslate?.translateOrigin?.model ?? "",
+        language: job.data.rssTranslate?.rssTranslate?.language ?? "",
+        prompt: job.data.rssTranslate?.translatePrompt?.prompt ?? "",
       });
       list.push({
         ...item,
@@ -80,48 +80,45 @@ const worker = new Worker<{
   },
 );
 
-worker.on("progress", async (job) => {
-  console.log(`${job.id} has progress ${job.progress}`);
-  await db
-    .update(rssTranslate)
+worker.on("progress", (job) => {
+  console.log(`${job.id} has progress ${job.progress.toString()}`);
+  db.update(rssTranslate)
     .set({
       jobStatus: "progress",
     })
     .where(
       and(
-        eq(rssTranslate.id, job.data.rssTranslate?.rssTranslate.id!),
-        eq(rssTranslate.jobId, job.id || ""),
+        eq(rssTranslate.id, job.data.rssTranslate?.rssTranslate.id ?? ""),
+        eq(rssTranslate.jobId, job.id ?? ""),
       ),
     );
 });
 
-worker.on("completed", async (job) => {
+worker.on("completed", (job) => {
   console.log(`${job.id} has completed!`);
-  await db
-    .update(rssTranslate)
+  db.update(rssTranslate)
     .set({
       jobStatus: "completed",
     })
     .where(
       and(
-        eq(rssTranslate.id, job.data.rssTranslate?.rssTranslate.id!),
-        eq(rssTranslate.jobId, job.id || ""),
+        eq(rssTranslate.id, job.data.rssTranslate?.rssTranslate.id ?? ""),
+        eq(rssTranslate.jobId, job.id ?? ""),
       ),
     );
 });
 
-worker.on("failed", async (job, err) => {
+worker.on("failed", (job, err) => {
   console.log(`${job?.id} has failed with ${err.message}`);
   if (job) {
-    await db
-      .update(rssTranslate)
+    db.update(rssTranslate)
       .set({
         jobStatus: "failed",
       })
       .where(
         and(
-          eq(rssTranslate.id, job.data.rssTranslate?.rssTranslate.id!),
-          eq(rssTranslate.jobId, job.id || ""),
+          eq(rssTranslate.id, job.data.rssTranslate?.rssTranslate.id ?? ""),
+          eq(rssTranslate.jobId, job.id ?? ""),
         ),
       );
   }

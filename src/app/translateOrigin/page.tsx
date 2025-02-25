@@ -26,7 +26,7 @@ const page = memo(async () => {
         <TranslateOriginFormDialog
           onOk={async () => {
             "use server";
-            revalidatePath(pathname || "");
+            revalidatePath(pathname ?? "");
           }}
         >
           <Button>Create</Button>
@@ -44,7 +44,7 @@ const page = memo(async () => {
                       id={item.id}
                       onOk={async () => {
                         "use server";
-                        revalidatePath(pathname || "");
+                        revalidatePath(pathname ?? "");
                       }}
                     >
                       <Button size={"icon"} variant={"ghost"}>
@@ -58,7 +58,7 @@ const page = memo(async () => {
                         await api.translateOrigin.delete({
                           id: item.id,
                         });
-                        revalidatePath(pathname || "");
+                        revalidatePath(pathname ?? "");
                       }}
                     >
                       <Button

@@ -1,9 +1,9 @@
+import { ChatOpenAI } from "@langchain/openai";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/server/db";
 import { translateOrigin } from "~/server/db/schema";
 import { authProcedure, createTRPCRouter } from "../trpc";
-import { ChatOpenAI } from "@langchain/openai";
 
 export const translateOriginRouter = createTRPCRouter({
   create: authProcedure

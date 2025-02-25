@@ -83,7 +83,7 @@ const SidebarLayout = async (props: PropsWithChildren) => {
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton
                             asChild
-                            isActive={item.isActive(pathname || "")}
+                            isActive={item.isActive(pathname ?? "")}
                           >
                             <a href={item.url}>
                               <item.icon />

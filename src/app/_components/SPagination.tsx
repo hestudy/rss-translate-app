@@ -37,4 +37,5 @@ const SPagination = memo(
   },
 );
 
+SPagination.displayName = "SPagination";
 export default SPagination;
