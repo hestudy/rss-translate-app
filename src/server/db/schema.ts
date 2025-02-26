@@ -230,7 +230,6 @@ export const rssTranslate = createTable("rssTranslate", {
     .notNull()
     .references(() => users.id),
   jobId: varchar("job_id", { length: 255 }),
-  jobStatus: varchar("job_status", { length: 255 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -245,12 +244,10 @@ export const rssTranslateData = createTable("rssTranslateData", {
     .notNull()
     .$defaultFn(() => crypto.randomUUID()),
   feed: json("feed"),
-  data: json("data"),
   rssTranslateId: varchar("rss_translate_id", { length: 255 })
     .notNull()
     .references(() => rssTranslate.id),
   jobId: varchar("job_id", { length: 255 }),
-  jobStatus: varchar("job_status", { length: 255 }),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),
@@ -270,7 +267,6 @@ export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
     .notNull()
     .references(() => rssTranslateData.id),
   jobId: varchar("job_id", { length: 255 }),
-  jobStatus: varchar("job_status", { length: 255 }),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),
