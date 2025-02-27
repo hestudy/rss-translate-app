@@ -1,4 +1,5 @@
 import { count, eq } from "drizzle-orm";
+import { User } from "next-auth";
 import { z } from "zod";
 import { db } from "~/server/db";
 import {
@@ -32,6 +33,28 @@ const getRssTranslateDetail = async (id: string) => {
   ).at(0);
 };
 
+const addRssTranslateQueue = async (id: string, user: User) => {
+  const detail = await getRssTranslateDetail(id);
+  if (detail?.rssTranslate.enabled && detail.rssTranslate.cron) {
+    const job = await rssTranslateDataQueue.add(
+      "rssTranslateData",
+      {
+        rssTranslate: detail,
+        user,
+      },
+      {
+        repeat: {
+          pattern: detail?.rssTranslate.cron,
+        },
+      },
+    );
+    await db
+      .update(rssTranslate)
+      .set({ jobId: job.id })
+      .where(eq(rssTranslate.id, id));
+  }
+};
+
 export const rssTranslateRouter = createTRPCRouter({
   create: authProcedure
     .input(createRssTranslateSchema)
@@ -45,20 +68,8 @@ export const rssTranslateRouter = createTRPCRouter({
           })
           .returning()
       ).at(0);
-      if (result?.enabled && result.cron) {
-        const detail = await getRssTranslateDetail(result.id);
-        await rssTranslateDataQueue.add(
-          "rssTranslateData",
-          {
-            rssTranslate: detail,
-            user: ctx.session.user,
-          },
-          {
-            repeat: {
-              pattern: result.cron,
-            },
-          },
-        );
+      if (result) {
+        await addRssTranslateQueue(result.id, ctx.session.user);
       }
     }),
   disabled: authProcedure
@@ -81,7 +92,9 @@ export const rssTranslateRouter = createTRPCRouter({
         id: z.string().nonempty(),
       }),
     )
-    .mutation(async ({ input }) => {}),
+    .mutation(async ({ input, ctx }) => {
+      await addRssTranslateQueue(input.id, ctx.session.user);
+    }),
   info: authProcedure
     .input(
       z.object({
