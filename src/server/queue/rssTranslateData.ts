@@ -44,6 +44,7 @@ const worker = new Worker<{
             .values({
               createdById: job.data.user.id!,
               rssTranslateDataId: result.id,
+              link: item.link ?? "",
               origin: item,
             })
             .returning()
@@ -53,6 +54,7 @@ const worker = new Worker<{
             "rssTranslateDataItem",
             {
               rssTranslateDataItem: itemResult,
+              rssTranslate: job.data.rssTranslate,
               item,
               user: job.data.user,
             },

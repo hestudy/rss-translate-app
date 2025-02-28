@@ -27,6 +27,24 @@ const worker = new Worker<{
   "rssTranslateDataItem",
   async (job) => {
     const data = job.data;
+
+    const record = await db.query.rssTranslateDataItem.findFirst({
+      where: eq(rssTranslateDataItem.link, data.item.link ?? ""),
+    });
+    if (record) {
+      await db
+        .update(rssTranslateDataItem)
+        .set({
+          data: {
+            ...data.item,
+            title: (record.data as any)?.title,
+            content: (record.data as any)?.content,
+          },
+        })
+        .where(eq(rssTranslateDataItem.id, data.rssTranslateDataItem.id));
+      return;
+    }
+
     const title = await translate({
       apiKey: data.rssTranslate?.translateOrigin?.apiKey ?? "",
       language: data.rssTranslate?.rssTranslate?.language ?? "",

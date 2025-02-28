@@ -12,6 +12,7 @@ const config = {
   ],
   rules: {
     "@typescript-eslint/array-type": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
     "@typescript-eslint/consistent-type-definitions": "off",
     "@typescript-eslint/no-base-to-string": "off",
     "react-hooks/exhaustive-deps": "off",

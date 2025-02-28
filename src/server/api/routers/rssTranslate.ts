@@ -33,7 +33,11 @@ const getRssTranslateDetail = async (id: string) => {
   ).at(0);
 };
 
-const addRssTranslateQueue = async (id: string, user: User) => {
+const addRssTranslateQueueAndUpdateRecord = async (
+  id: string,
+  user: User,
+  isTest = false,
+) => {
   const detail = await getRssTranslateDetail(id);
   if (detail?.rssTranslate.enabled && detail.rssTranslate.cron) {
     const job = await rssTranslateDataQueue.add(
@@ -42,16 +46,30 @@ const addRssTranslateQueue = async (id: string, user: User) => {
         rssTranslate: detail,
         user,
       },
-      {
-        repeat: {
-          pattern: detail?.rssTranslate.cron,
-        },
-      },
+      isTest
+        ? undefined
+        : {
+            repeat: {
+              pattern: detail?.rssTranslate.cron,
+            },
+          },
     );
     await db
       .update(rssTranslate)
       .set({ jobId: job.id })
       .where(eq(rssTranslate.id, id));
+  }
+};
+
+const removeJob = async (jobId: string) => {
+  const jobState = await rssTranslateDataQueue.getJobState(jobId);
+  if (jobState === "delayed") {
+    const jobSCheduler = await rssTranslateDataQueue.getJobScheduler(jobId);
+    if (jobSCheduler.id) {
+      await rssTranslateDataQueue.removeJobScheduler(jobSCheduler.id);
+    }
+  } else {
+    await rssTranslateDataQueue.remove(jobId);
   }
 };
 
@@ -69,7 +87,7 @@ export const rssTranslateRouter = createTRPCRouter({
           .returning()
       ).at(0);
       if (result) {
-        await addRssTranslateQueue(result.id, ctx.session.user);
+        await addRssTranslateQueueAndUpdateRecord(result.id, ctx.session.user);
       }
     }),
   disabled: authProcedure
@@ -83,15 +101,15 @@ export const rssTranslateRouter = createTRPCRouter({
         where: eq(rssTranslate.id, input.id),
       });
       if (record?.jobId) {
-        await rssTranslateDataQueue.remove(record.jobId);
-        await db
-          .update(rssTranslate)
-          .set({
-            enabled: false,
-            jobId: null,
-          })
-          .where(eq(rssTranslate.id, input.id));
+        await removeJob(record.jobId);
       }
+      await db
+        .update(rssTranslate)
+        .set({
+          enabled: false,
+          jobId: null,
+        })
+        .where(eq(rssTranslate.id, input.id));
     }),
   enabled: authProcedure
     .input(
@@ -100,13 +118,13 @@ export const rssTranslateRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await addRssTranslateQueue(input.id, ctx.session.user);
       await db
         .update(rssTranslate)
         .set({
           enabled: true,
         })
         .where(eq(rssTranslate.id, input.id));
+      await addRssTranslateQueueAndUpdateRecord(input.id, ctx.session.user);
     }),
   info: authProcedure
     .input(
@@ -139,17 +157,7 @@ export const rssTranslateRouter = createTRPCRouter({
         where: eq(rssTranslate.id, input.id),
       });
       if (record?.jobId) {
-        const jobState = await rssTranslateDataQueue.getJobState(record.jobId);
-        if (jobState === "delayed") {
-          const jobSCheduler = await rssTranslateDataQueue.getJobScheduler(
-            record.jobId,
-          );
-          if (jobSCheduler.id) {
-            await rssTranslateDataQueue.removeJobScheduler(jobSCheduler.id);
-          }
-        } else {
-          await rssTranslateDataQueue.remove(record.jobId);
-        }
+        await removeJob(record.jobId);
       }
       return await db.delete(rssTranslate).where(eq(rssTranslate.id, input.id));
     }),
@@ -197,40 +205,18 @@ export const rssTranslateRouter = createTRPCRouter({
         total: result?.count ?? 0,
       };
     }),
-  run: authProcedure
+  test: authProcedure
     .input(
       z.object({
         id: z.string().nonempty(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const result = (
-        await db
-          .select()
-          .from(rssTranslate)
-          .where(eq(rssTranslate.id, input.id))
-          .leftJoin(rssOrigin, eq(rssTranslate.rssOrigin, rssOrigin.id))
-          .leftJoin(
-            translateOrigin,
-            eq(rssTranslate.translateOrigin, translateOrigin.id),
-          )
-          .leftJoin(
-            translatePrompt,
-            eq(rssTranslate.translatePrompt, translatePrompt.id),
-          )
-      ).at(0);
-      if (result) {
-        const job = await rssTranslateDataQueue.add("rssTranslate", {
-          rssTranslate: result,
-          user: ctx.session.user,
-        });
-        await db
-          .update(rssTranslate)
-          .set({
-            jobId: job.id,
-          })
-          .where(eq(rssTranslate.id, input.id));
-      }
+      await addRssTranslateQueueAndUpdateRecord(
+        input.id,
+        ctx.session.user,
+        true,
+      );
     }),
   detail: authProcedure
     .input(
