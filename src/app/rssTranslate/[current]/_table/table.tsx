@@ -1,7 +1,8 @@
 "use client";
 
 import { createColumnHelper } from "@tanstack/react-table";
-import { Edit, History, Play, Rss, Trash } from "lucide-react";
+import { Edit, FlaskConical, History, Play, Rss, Trash } from "lucide-react";
+import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import ConfirmPopover from "~/app/_components/confirmPopover";
@@ -9,9 +10,8 @@ import { DataTable } from "~/app/_components/DataTable";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { type api as sapi } from "~/trpc/server";
-import RssTranslateFormDialog from "../_dialog/RssTranslateFormDialog";
 import HistoryDataSheet from "../_components/HistoryDataSheet";
-import Link from "next/link";
+import RssTranslateFormDialog from "../_dialog/RssTranslateFormDialog";
 
 const columnHelper =
   createColumnHelper<
@@ -39,7 +39,7 @@ export default function RssTranslateTable(props: {
       columnHelper.accessor("rssTranslate.language", {
         header: "TranslateLanguage",
       }),
-      columnHelper.accessor("rssTranslate.jobStatus", {
+      columnHelper.accessor("rssTranslate.jobState", {
         header: "JobState",
       }),
       columnHelper.display({
@@ -66,7 +66,7 @@ export default function RssTranslateTable(props: {
                 }}
               >
                 <Button variant={"ghost"} size={"icon"}>
-                  <Play />
+                  <FlaskConical />
                 </Button>
               </ConfirmPopover>
               <HistoryDataSheet id={cellProps.row.original.rssTranslate.id}>

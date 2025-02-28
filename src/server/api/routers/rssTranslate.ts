@@ -1,5 +1,5 @@
 import { count, eq } from "drizzle-orm";
-import { User } from "next-auth";
+import { type User } from "next-auth";
 import { z } from "zod";
 import { db } from "~/server/db";
 import {
@@ -84,6 +84,13 @@ export const rssTranslateRouter = createTRPCRouter({
       });
       if (record?.jobId) {
         await rssTranslateDataQueue.remove(record.jobId);
+        await db
+          .update(rssTranslate)
+          .set({
+            enabled: false,
+            jobId: null,
+          })
+          .where(eq(rssTranslate.id, input.id));
       }
     }),
   enabled: authProcedure
@@ -94,6 +101,12 @@ export const rssTranslateRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       await addRssTranslateQueue(input.id, ctx.session.user);
+      await db
+        .update(rssTranslate)
+        .set({
+          enabled: true,
+        })
+        .where(eq(rssTranslate.id, input.id));
     }),
   info: authProcedure
     .input(
@@ -122,6 +135,22 @@ export const rssTranslateRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      const record = await db.query.rssTranslate.findFirst({
+        where: eq(rssTranslate.id, input.id),
+      });
+      if (record?.jobId) {
+        const jobState = await rssTranslateDataQueue.getJobState(record.jobId);
+        if (jobState === "delayed") {
+          const jobSCheduler = await rssTranslateDataQueue.getJobScheduler(
+            record.jobId,
+          );
+          if (jobSCheduler.id) {
+            await rssTranslateDataQueue.removeJobScheduler(jobSCheduler.id);
+          }
+        } else {
+          await rssTranslateDataQueue.remove(record.jobId);
+        }
+      }
       return await db.delete(rssTranslate).where(eq(rssTranslate.id, input.id));
     }),
   page: authProcedure
@@ -147,8 +176,24 @@ export const rssTranslateRouter = createTRPCRouter({
           eq(rssTranslate.translatePrompt, translatePrompt.id),
         );
       const [result] = await db.select({ count: count() }).from(rssTranslate);
+
       return {
-        list,
+        list: await Promise.all(
+          list.map(async (item) => {
+            return {
+              ...item,
+              rssTranslate: {
+                ...item.rssTranslate,
+                jobState:
+                  (item.rssTranslate.jobId &&
+                    (await rssTranslateDataQueue.getJobState(
+                      item.rssTranslate.jobId,
+                    ))) ??
+                  null,
+              },
+            };
+          }),
+        ),
         total: result?.count ?? 0,
       };
     }),

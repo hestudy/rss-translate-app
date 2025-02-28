@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Switch } from "~/components/ui/switch";
 import { createRssTranslateSchema } from "~/server/api/schema/rssTranslate";
 import { api } from "~/trpc/react";
 
@@ -163,6 +164,41 @@ const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="cron"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Cron</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="enabled"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <div className="mt-4 flex items-center space-x-2">
+                  <FormLabel>Enable</FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </div>
                 <FormMessage />
               </FormItem>
             );

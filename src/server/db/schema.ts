@@ -246,7 +246,7 @@ export const rssTranslateData = createTable("rssTranslateData", {
   feed: json("feed"),
   rssTranslateId: varchar("rss_translate_id", { length: 255 })
     .notNull()
-    .references(() => rssTranslate.id),
+    .references(() => rssTranslate.id, { onDelete: "cascade" }),
   jobId: varchar("job_id", { length: 255 }),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
@@ -265,7 +265,7 @@ export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
   data: json("data"),
   rssTranslateDataId: varchar("rss_translate_data_id", { length: 255 })
     .notNull()
-    .references(() => rssTranslateData.id),
+    .references(() => rssTranslateData.id, { onDelete: "cascade" }),
   jobId: varchar("job_id", { length: 255 }),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
