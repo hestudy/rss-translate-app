@@ -39,7 +39,7 @@ const addRssTranslateQueueAndUpdateRecord = async (
   isTest = false,
 ) => {
   const detail = await getRssTranslateDetail(id);
-  if (detail?.rssTranslate.enabled && detail.rssTranslate.cron) {
+  if ((isTest || detail?.rssTranslate.enabled) && detail?.rssTranslate.cron) {
     const job = await rssTranslateDataQueue.add(
       "rssTranslateData",
       {

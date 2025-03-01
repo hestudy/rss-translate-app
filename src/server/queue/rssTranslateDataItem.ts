@@ -31,7 +31,7 @@ const worker = new Worker<{
     const record = await db.query.rssTranslateDataItem.findFirst({
       where: eq(rssTranslateDataItem.link, data.item.link ?? ""),
     });
-    if (record) {
+    if (record?.data) {
       await db
         .update(rssTranslateDataItem)
         .set({
