@@ -18,7 +18,6 @@ import { DataTable } from "~/app/_components/DataTable";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { type api as sapi } from "~/trpc/server";
-import HistoryDataSheet from "../_components/HistoryDataSheet";
 import RssTranslateFormDialog from "../_dialog/RssTranslateFormDialog";
 
 const columnHelper =
@@ -111,11 +110,13 @@ export default function RssTranslateTable(props: {
                   <FlaskConical />
                 </Button>
               </ConfirmPopover>
-              <HistoryDataSheet id={cellProps.row.original.rssTranslate.id}>
+              <Link
+                href={`/rssTranslateHistory/${cellProps.row.original.rssTranslate.id}/1`}
+              >
                 <Button size={"icon"} variant={"link"}>
                   <History />
                 </Button>
-              </HistoryDataSheet>
+              </Link>
               <RssTranslateFormDialog
                 id={cellProps.row.original.rssTranslate.id}
                 onOk={props.onOk}
