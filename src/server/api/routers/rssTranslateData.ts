@@ -8,6 +8,7 @@ import {
   rssTranslateDataItem,
 } from "~/server/db/schema";
 import { authProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import { rssTranslateDataQueue } from "~/server/queue/rssTranslateData";
 
 export const rssTranslateDataRouter = createTRPCRouter({
   page: authProcedure
@@ -34,7 +35,16 @@ export const rssTranslateDataRouter = createTRPCRouter({
       const total = res.at(0)?.count;
 
       return {
-        list,
+        list: await Promise.all(
+          list.map(async (d) => {
+            return {
+              ...d,
+              jobState: d.jobId
+                ? await rssTranslateDataQueue.getJobState(d.jobId)
+                : null,
+            };
+          }),
+        ),
         total,
       };
     }),
