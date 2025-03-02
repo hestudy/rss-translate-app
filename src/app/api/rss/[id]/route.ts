@@ -1,21 +1,22 @@
 import { type NextRequest } from "next/server";
-import { api } from "~/trpc/server";
 import Rss from "rss";
 import type Parser from "rss-parser";
+import { api } from "~/trpc/server";
 
 export const GET = async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) => {
   const id = (await params).id;
-  const detail = await api.rssTranslateData.lastActive({ id });
-  const data = detail?.data as Parser.Output<any>;
+  const record = await api.rssTranslateData.lastActive({ id });
+  const data = record.at(0)?.rssTranslateData?.feed as Parser.Output<any>;
   const feed = new Rss({
     title: data.title!,
     feed_url: data.feedUrl!,
     site_url: data.link!,
   });
-  data.items.forEach((item: Parser.Item) => {
+  record.forEach((d) => {
+    const item = d.rssTranslateDataItem?.data as Parser.Item;
     feed.item({
       date: item.pubDate!,
       description: item.content!,

@@ -1,7 +1,12 @@
-import { and, count, desc, eq, isNotNull } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
+import { uniqWith } from "lodash";
 import { z } from "zod";
 import { db } from "~/server/db";
-import { rssTranslateData } from "~/server/db/schema";
+import {
+  rssTranslate,
+  rssTranslateData,
+  rssTranslateDataItem,
+} from "~/server/db/schema";
 import { authProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const rssTranslateDataRouter = createTRPCRouter({
@@ -40,17 +45,25 @@ export const rssTranslateDataRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      return (
-        await db
-          .select()
-          .from(rssTranslateData)
-          .where(
-            and(
-              isNotNull(rssTranslateData.data),
-              eq(rssTranslateData.rssTranslateId, input.id),
-            ),
-          )
-          .orderBy(desc(rssTranslateData.createdAt))
-      ).at(0);
+      return uniqWith(
+        (
+          await db
+            .select()
+            .from(rssTranslate)
+            .where(eq(rssTranslate.id, input.id))
+            .leftJoin(
+              rssTranslateData,
+              eq(rssTranslate.id, rssTranslateData.rssTranslateId),
+            )
+            .leftJoin(
+              rssTranslateDataItem,
+              eq(rssTranslateData.id, rssTranslateDataItem.rssTranslateDataId),
+            )
+            .orderBy(asc(rssTranslateDataItem.createdAt))
+        ).filter((item) => {
+          return !!item.rssTranslateDataItem?.data;
+        }),
+        (x, y) => x.rssTranslateDataItem?.link === y.rssTranslateDataItem?.link,
+      );
     }),
 });
