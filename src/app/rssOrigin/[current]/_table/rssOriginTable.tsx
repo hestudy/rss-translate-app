@@ -18,7 +18,6 @@ const columnHelper =
 
 const RssOriginTable = memo((props: { data: any; onOk?: () => void }) => {
   const deleteMutation = api.rssOrigin.delete.useMutation();
-  const runMutation = api.rssOrigin.run.useMutation();
 
   const columns = useMemo(() => {
     return [
