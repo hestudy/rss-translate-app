@@ -1,7 +1,7 @@
 "use client";
 import { createColumnHelper } from "@tanstack/react-table";
 import dayjs from "dayjs";
-import { Edit, History, Play, Trash } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { memo, useMemo } from "react";
 import { toast } from "sonner";
 import ConfirmPopover from "~/app/_components/confirmPopover";
@@ -9,7 +9,6 @@ import { DataTable } from "~/app/_components/DataTable";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { type api as sapi } from "~/trpc/server";
-import HistoryDataSheet from "../_components/HistoryDataSheet";
 import OriginFormDialog from "../_components/OriginFormDialog";
 
 const columnHelper =
@@ -54,24 +53,6 @@ const RssOriginTable = memo((props: { data: any; onOk?: () => void }) => {
           const id = cellProps.row.original.id;
           return (
             <div className="space-x-2">
-              <ConfirmPopover
-                title="Confirm Run?"
-                onConfirm={async () => {
-                  await runMutation.mutateAsync({
-                    id,
-                  });
-                  props.onOk?.();
-                }}
-              >
-                <Button size={"icon"} variant={"link"}>
-                  <Play />
-                </Button>
-              </ConfirmPopover>
-              <HistoryDataSheet id={id}>
-                <Button size={"icon"} variant={"link"}>
-                  <History />
-                </Button>
-              </HistoryDataSheet>
               <OriginFormDialog
                 id={id}
                 onOk={() => {
