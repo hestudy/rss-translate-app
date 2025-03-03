@@ -54,10 +54,12 @@ const addRssTranslateQueueAndUpdateRecord = async (
             },
           },
     );
-    await db
-      .update(rssTranslate)
-      .set({ jobId: job.id })
-      .where(eq(rssTranslate.id, id));
+    if (!isTest) {
+      await db
+        .update(rssTranslate)
+        .set({ jobId: job.id })
+        .where(eq(rssTranslate.id, id));
+    }
   }
 };
 
