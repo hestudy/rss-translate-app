@@ -16,9 +16,14 @@ const columnHelper =
   >();
 
 const RssTranslateDataItemTable = memo(({ id }: { id: string }) => {
-  const query = api.rssTranslateDataItem.list.useQuery({
-    id,
-  });
+  const query = api.rssTranslateDataItem.list.useQuery(
+    {
+      id,
+    },
+    {
+      staleTime: 0,
+    },
+  );
 
   const columns = useMemo(
     () => [
