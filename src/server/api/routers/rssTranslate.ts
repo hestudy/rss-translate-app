@@ -5,6 +5,7 @@ import { db } from "~/server/db";
 import {
   rssOrigin,
   rssTranslate,
+  rssTranslateData,
   translateOrigin,
   translatePrompt,
 } from "~/server/db/schema";
@@ -235,5 +236,16 @@ export const rssTranslateRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       return await getRssTranslateDetail(input.id);
+    }),
+  clear: authProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .delete(rssTranslateData)
+        .where(eq(rssTranslateData.rssTranslateId, input.id));
     }),
 });

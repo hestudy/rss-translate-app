@@ -61,6 +61,7 @@ const worker = new Worker<{
       data.rssTranslate?.rssTranslate.scrapyFull &&
       data.rssTranslate.rssTranslate.firecrawlApiKey
     ) {
+      console.log("scraping:", data.item.link);
       const firecrawl = new FirecrawlApp({
         apiKey: data.rssTranslate.rssTranslate.firecrawlApiKey,
       });
@@ -68,6 +69,7 @@ const worker = new Worker<{
         formats: ["markdown"],
       });
       if (res.success) {
+        console.log("scrapyed:", data.item.link, res.markdown);
         feedContent = res.markdown ?? "";
       }
     } else {
