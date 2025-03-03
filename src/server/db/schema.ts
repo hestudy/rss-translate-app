@@ -226,6 +226,8 @@ export const rssTranslate = createTable("rssTranslate", {
   language: varchar("language", { length: 255 }).notNull(),
   cron: varchar("cron", { length: 255 }).notNull(),
   enabled: boolean("enabled").notNull(),
+  scrapyFull: boolean("scrapy_full").default(false),
+  firecrawlApiKey: varchar("firecrawl_api_key", { length: 255 }),
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),

@@ -141,12 +141,19 @@ export const rssTranslateRouter = createTRPCRouter({
     }),
   update: authProcedure
     .input(updateRssTranslateSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { id, ...props } = input;
-      return await db
-        .update(rssTranslate)
-        .set(props)
-        .where(eq(rssTranslate.id, id));
+      const result = (
+        await db
+          .update(rssTranslate)
+          .set(props)
+          .where(eq(rssTranslate.id, id))
+          .returning()
+      ).at(0);
+      if (result?.jobId) {
+        await removeJob(result.jobId);
+        await addRssTranslateQueueAndUpdateRecord(result.id, ctx.session.user);
+      }
     }),
   delete: authProcedure
     .input(
