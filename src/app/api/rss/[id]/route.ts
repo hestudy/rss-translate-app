@@ -17,12 +17,14 @@ export const GET = async (
   });
   record.forEach((d) => {
     const item = d.rssTranslateDataItem?.data as Parser.Item | undefined;
-    feed.item({
-      date: item?.pubDate ?? "",
-      description: item?.content ?? "",
-      title: item?.title ?? "",
-      url: item?.link ?? "",
-    });
+    if (item) {
+      feed.item({
+        date: item.pubDate ?? "",
+        description: item.content ?? "",
+        title: item.title ?? "",
+        url: item.link ?? "",
+      });
+    }
   });
 
   const headers = new Headers();
