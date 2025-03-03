@@ -16,12 +16,12 @@ export const GET = async (
     site_url: data.link!,
   });
   record.forEach((d) => {
-    const item = d.rssTranslateDataItem?.data as Parser.Item;
+    const item = d.rssTranslateDataItem?.data as Parser.Item | undefined;
     feed.item({
-      date: item.pubDate!,
-      description: item.content!,
-      title: item.title!,
-      url: item.link!,
+      date: item?.pubDate ?? "",
+      description: item?.content ?? "",
+      title: item?.title ?? "",
+      url: item?.link ?? "",
     });
   });
 
