@@ -48,6 +48,9 @@ export default function RssTranslateTable(props: {
       columnHelper.accessor("rssTranslate.language", {
         header: "TranslateLanguage",
       }),
+      columnHelper.accessor("rssTranslate.scrapyFull", {
+        header: "ScrapyFull",
+      }),
       columnHelper.accessor("rssTranslate.jobState", {
         header: "JobState",
       }),

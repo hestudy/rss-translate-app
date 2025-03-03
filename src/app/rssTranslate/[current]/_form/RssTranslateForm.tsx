@@ -47,7 +47,11 @@ const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
 
   useEffect(() => {
     if (query.data) {
-      form.reset(query.data);
+      form.reset({
+        ...query.data,
+        scrapyFull: !!query.data.scrapyFull,
+        firecrawlApiKey: query.data.firecrawlApiKey ?? "",
+      });
     }
   }, [query.data]);
 
@@ -191,7 +195,7 @@ const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
             return (
               <FormItem>
                 <div className="mt-4 flex items-center space-x-2">
-                  <FormLabel>Enable</FormLabel>
+                  <FormLabel>Enable Cron</FormLabel>
                   <FormControl>
                     <Switch
                       checked={field.value}
@@ -204,8 +208,47 @@ const RssTranslateForm = memo((props: { onOk?: () => void; id?: string }) => {
             );
           }}
         />
+        <FormField
+          control={form.control}
+          name="scrapyFull"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <div className="mt-4 flex items-center space-x-2">
+                  <FormLabel>Scrapy Full</FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        {form.watch("scrapyFull") && (
+          <FormField
+            control={form.control}
+            name="firecrawlApiKey"
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>FireCrawl Api Key</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        )}
         <div className="flex justify-end">
-          <Button type="submit">Save</Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            Save
+          </Button>
         </div>
       </form>
     </Form>
