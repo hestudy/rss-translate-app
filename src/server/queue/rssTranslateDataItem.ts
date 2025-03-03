@@ -1,3 +1,4 @@
+import FirecrawlApp from "@mendable/firecrawl-js";
 import { Queue, Worker } from "bullmq";
 import { eq } from "drizzle-orm";
 import { type User } from "next-auth";
@@ -53,14 +54,35 @@ const worker = new Worker<{
       model: data.rssTranslate?.translateOrigin?.model ?? "",
       content: data.item.title ?? "",
     });
+
+    let feedContent = "";
+
+    if (
+      data.rssTranslate?.rssTranslate.scrapyFull &&
+      data.rssTranslate.rssTranslate.firecrawlApiKey
+    ) {
+      const firecrawl = new FirecrawlApp({
+        apiKey: data.rssTranslate.rssTranslate.firecrawlApiKey,
+      });
+      const res = await firecrawl.scrapeUrl(data.item.link ?? "", {
+        formats: ["markdown"],
+      });
+      if (res.success) {
+        feedContent = res.markdown ?? "";
+      }
+    } else {
+      feedContent = data.item.content ?? "";
+    }
+
     const content = await translate({
       apiKey: data.rssTranslate?.translateOrigin?.apiKey ?? "",
       language: data.rssTranslate?.rssTranslate?.language ?? "",
       prompt: data.rssTranslate?.translatePrompt?.prompt ?? "",
       baseUrl: data.rssTranslate?.translateOrigin?.baseUrl ?? "",
       model: data.rssTranslate?.translateOrigin?.model ?? "",
-      content: data.item.content ?? "",
+      content: feedContent,
     });
+
     await db
       .update(rssTranslateDataItem)
       .set({

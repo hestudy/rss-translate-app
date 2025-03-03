@@ -13,6 +13,8 @@ export const createRssTranslateSchema = z.object({
     }
     return true;
   }),
+  scrapyFull: z.boolean().default(false),
+  firecrawlApiKey: z.string().optional(),
 });
 
 export const updateRssTranslateSchema = createRssTranslateSchema.extend({
