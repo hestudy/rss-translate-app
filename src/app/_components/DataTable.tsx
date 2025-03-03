@@ -1,11 +1,13 @@
 "use client";
 
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
+  type Row,
   useReactTable,
 } from "@tanstack/react-table";
+import { Fragment, type ReactNode } from "react";
 import {
   Table,
   TableBody,
@@ -18,16 +20,22 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: any[];
   data: TData[];
+  renderSubComponent?: (row: Row<TData>) => ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  renderSubComponent,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand() {
+      return true;
+    },
   });
 
   return (
@@ -54,16 +62,25 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
+              <Fragment key={row.id}>
+                <TableRow data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+                {row.getIsExpanded() && (
+                  <TableRow>
+                    <TableCell colSpan={row.getVisibleCells().length}>
+                      {renderSubComponent?.(row)}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
             ))
           ) : (
             <TableRow>

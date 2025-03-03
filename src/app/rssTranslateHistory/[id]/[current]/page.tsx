@@ -15,7 +15,7 @@ const page = memo(
 
     return (
       <div className="flex h-full flex-col space-y-2">
-        <div className="h-0 flex-1">
+        <div className="h-0 flex-1 overflow-y-auto">
           <RssTanslateHistoryTable data={list} />
         </div>
         <div>
