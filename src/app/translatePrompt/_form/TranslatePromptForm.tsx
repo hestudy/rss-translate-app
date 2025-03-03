@@ -97,7 +97,7 @@ const TranslatePromptForm = memo(
                 <FormItem>
                   <FormLabel>Prompt</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea {...field} className="h-[200px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

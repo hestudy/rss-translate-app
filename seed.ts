@@ -66,8 +66,10 @@ const main = async () => {
               defaultValue: "Default Prompt",
             }),
             prompt: f.default({
-              defaultValue:
-                'You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it.Translate into {language}:"""{content}"""',
+              defaultValue: `You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it.
+
+Translate into {language}:
+"""{content}"""`,
             }),
             createdById: f.default({
               defaultValue: adminUser?.id,
