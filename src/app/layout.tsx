@@ -11,7 +11,14 @@ export const metadata: Metadata = {
   title: "RssTranslate App",
   description: "RssTranslate App",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
-  keywords: ["rss", "translate", "rss-translate", "rss-translate-app"],
+  keywords: [
+    "rss",
+    "translate",
+    "rss-translate",
+    "rss-translate-app",
+    "ai translate",
+    "openai translate",
+  ],
 };
 
 export default function RootLayout({
