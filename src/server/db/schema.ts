@@ -311,6 +311,18 @@ export const newRssTranslateData = createTable("newRssTranslateData", {
     .notNull(),
 });
 
+export const newRssTranslateDataRelation = relations(
+  newRssTranslateData,
+  ({ one }) => {
+    return {
+      rssTranslate: one(rssTranslate, {
+        fields: [newRssTranslateData.rssTranslateId],
+        references: [rssTranslate.id],
+      }),
+    };
+  },
+);
+
 export const newRssTranslateDataItem = createTable("newRssTranslateDataItem", {
   id: varchar("id", { length: 255 })
     .primaryKey()
@@ -330,3 +342,15 @@ export const newRssTranslateDataItem = createTable("newRssTranslateDataItem", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
+
+export const newRssTranslateDataItemRelation = relations(
+  newRssTranslateDataItem,
+  ({ one }) => {
+    return {
+      newRssTranslateData: one(newRssTranslateData, {
+        fields: [newRssTranslateDataItem.newRssTranslateDataId],
+        references: [newRssTranslateData.id],
+      }),
+    };
+  },
+);
