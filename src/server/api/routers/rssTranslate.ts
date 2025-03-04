@@ -52,6 +52,7 @@ const addRssTranslateQueueAndUpdateRecord = async (
         : {
             repeat: {
               pattern: detail?.rssTranslate.cron,
+              key: id,
             },
           },
     );
