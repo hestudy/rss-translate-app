@@ -25,6 +25,43 @@ const worker = new Worker<{
   "rssTranslateData",
   async (job) => {
     const feed = await fetchFeed(job.data.rssTranslate?.rssOrigin?.link ?? "");
+
+    if (!feed) {
+      throw new Error("Failed to fetch feed");
+    }
+
+    const existQueueList = await db
+      .select()
+      .from(rssTranslateData)
+      .where(
+        eq(
+          rssTranslateData.rssTranslateId,
+          job.data.rssTranslate?.rssTranslate.id ?? "",
+        ),
+      )
+      .leftJoin(
+        rssTranslateDataItem,
+        eq(rssTranslateDataItem.rssTranslateDataId, rssTranslateData.id),
+      );
+
+    const existQueueStateList = await Promise.all(
+      existQueueList.map(
+        async (item) =>
+          await rssTranslateDataItemQueue.getJobState(
+            item.rssTranslateDataItem?.jobId ?? "",
+          ),
+      ),
+    );
+
+    const hasWaitQueue = existQueueStateList.some(
+      (d) => d === "waiting" || d === "active",
+    );
+
+    if (hasWaitQueue) {
+      console.log("has wait queue, skip");
+      return;
+    }
+
     const result = (
       await db
         .insert(rssTranslateData)
