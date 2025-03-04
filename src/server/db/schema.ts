@@ -240,6 +240,21 @@ export const rssTranslate = createTable("rssTranslate", {
   ),
 });
 
+export const rssTranslateRelations = relations(rssTranslate, ({ one }) => ({
+  rssOriginData: one(rssOrigin, {
+    fields: [rssTranslate.rssOrigin],
+    references: [rssOrigin.id],
+  }),
+  translateOriginData: one(translateOrigin, {
+    fields: [rssTranslate.translateOrigin],
+    references: [translateOrigin.id],
+  }),
+  translatePromptData: one(translatePrompt, {
+    fields: [rssTranslate.translatePrompt],
+    references: [translatePrompt.id],
+  }),
+}));
+
 export const rssTranslateData = createTable("rssTranslateData", {
   id: varchar("id", { length: 255 })
     .primaryKey()
@@ -273,6 +288,44 @@ export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
   createdById: varchar("created_by", { length: 255 })
     .notNull()
     .references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const newRssTranslateData = createTable("newRssTranslateData", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
+  feed: json("feed"),
+  rssTranslateId: varchar("rss_translate_id", { length: 255 })
+    .notNull()
+    .references(() => rssTranslate.id, { onDelete: "cascade" }),
+  jobId: varchar("job_id", { length: 255 }),
+  createdById: varchar("created_by", { length: 255 }).references(
+    () => users.id,
+  ),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const newRssTranslateDataItem = createTable("newRssTranslateDataItem", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
+  origin: json("origin"),
+  data: json("data"),
+  link: varchar("link", { length: 255 }).notNull(),
+  newRssTranslateDataId: varchar("new_rss_translate_data_id", { length: 255 })
+    .notNull()
+    .references(() => newRssTranslateData.id, { onDelete: "cascade" }),
+  jobId: varchar("job_id", { length: 255 }),
+  createdById: varchar("created_by", { length: 255 }).references(
+    () => users.id,
+  ),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
