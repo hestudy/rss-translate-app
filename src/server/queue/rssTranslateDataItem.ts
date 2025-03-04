@@ -66,11 +66,11 @@ const worker = new Worker<{
         apiKey: data.rssTranslate.rssTranslate.firecrawlApiKey,
       });
       const res = await firecrawl.scrapeUrl(data.item.link ?? "", {
-        formats: ["markdown"],
+        formats: ["html"],
       });
       if (res.success) {
-        console.log("scrapyed:", data.item.link, res.markdown);
-        feedContent = res.markdown ?? "";
+        console.log("scrapyed:", data.item.link, res.html);
+        feedContent = res.html ?? "";
       }
     } else {
       feedContent = data.item.content ?? "";
