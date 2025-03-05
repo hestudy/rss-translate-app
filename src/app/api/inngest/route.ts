@@ -16,4 +16,5 @@ export const { GET, POST, PUT } = serve({
     fetchFeed,
     translate,
   ],
+  streaming: "allow",
 });
