@@ -78,20 +78,15 @@ export const rssTranslateRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const list = await db
-        .select()
-        .from(rssTranslate)
-        .offset((input.current - 1) * input.pageSize)
-        .limit(input.pageSize)
-        .leftJoin(rssOrigin, eq(rssTranslate.rssOrigin, rssOrigin.id))
-        .leftJoin(
-          translateOrigin,
-          eq(rssTranslate.translateOrigin, translateOrigin.id),
-        )
-        .leftJoin(
-          translatePrompt,
-          eq(rssTranslate.translatePrompt, translatePrompt.id),
-        );
+      const list = await db.query.rssTranslate.findMany({
+        limit: input.pageSize,
+        offset: (input.current - 1) * input.pageSize,
+        with: {
+          rssOriginData: true,
+          translateOriginData: true,
+          translatePromptData: true,
+        },
+      });
       const [result] = await db.select({ count: count() }).from(rssTranslate);
 
       return {
