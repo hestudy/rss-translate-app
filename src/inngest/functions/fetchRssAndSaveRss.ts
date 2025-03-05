@@ -5,8 +5,8 @@ import {
   rssTranslateData,
   rssTranslateDataItem,
 } from "~/server/db/schema";
-import { fetchFeed } from "~/utils/fetchFeed";
 import { inngest } from "../client";
+import { fetchFeed } from "./fetchFeed";
 
 export const fetchRssAndSaveRss = inngest.createFunction(
   {
@@ -30,12 +30,12 @@ export const fetchRssAndSaveRss = inngest.createFunction(
       },
     );
     for (const item of rssTranslateList) {
-      const feed = await step.run(
-        `fetch rss ${item.rssOriginData.link}`,
-        async () => {
-          return await fetchFeed(item.rssOriginData.link);
+      const feed = await step.invoke(`fetch rss ${item.rssOriginData.link}`, {
+        function: fetchFeed,
+        data: {
+          url: item.rssOriginData.link,
         },
-      );
+      });
 
       const rssTranslateDataResult = await step.run(
         `save rss data: ${feed.title}`,

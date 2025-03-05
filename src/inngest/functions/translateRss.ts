@@ -1,10 +1,9 @@
-import FirecrawlApp from "@mendable/firecrawl-js";
 import { eq, isNull } from "drizzle-orm";
 import type Parser from "rss-parser";
 import { db } from "~/server/db";
 import { rssTranslate, rssTranslateDataItem } from "~/server/db/schema";
-import { translate } from "~/utils/translate";
 import { inngest } from "../client";
+import { translate } from "./translate";
 
 export const translateRss = inngest.createFunction(
   {
@@ -20,13 +19,26 @@ export const translateRss = inngest.createFunction(
         return await db.query.rssTranslateDataItem.findMany({
           where: isNull(rssTranslateDataItem.data),
           with: {
-            rssTranslateData: true,
+            rssTranslateData: {
+              with: {
+                rssTranslate: true,
+              },
+            },
           },
         });
       },
     );
 
-    for (const item of noTranslateRssItemList) {
+    const enableRssItemList = await step.run(
+      "filter enable rss translate",
+      async () => {
+        return noTranslateRssItemList.filter(
+          (d) => !!d.rssTranslateData.rssTranslate.enabled,
+        );
+      },
+    );
+
+    for (const item of enableRssItemList) {
       const origin = item.origin as Parser.Item;
       const rssTranslateRecord = await step.run(
         `get rss translate config: ${item.link}`,
@@ -43,17 +55,18 @@ export const translateRss = inngest.createFunction(
       );
 
       if (rssTranslateRecord) {
-        const title = await step.run(
+        const title = await step.invoke(
           `translate rss title: ${origin.title}`,
-          async () => {
-            return await translate({
+          {
+            function: translate,
+            data: {
               apiKey: rssTranslateRecord.translateOriginData.apiKey ?? "",
               language: rssTranslateRecord.language ?? "",
               model: rssTranslateRecord.translateOriginData.model ?? "",
               prompt: rssTranslateRecord.translatePromptData.prompt ?? "",
               baseUrl: rssTranslateRecord.translateOriginData.baseUrl ?? "",
               content: origin.title,
-            });
+            },
           },
         );
 
@@ -63,31 +76,33 @@ export const translateRss = inngest.createFunction(
           rssTranslateRecord.scrapyFull &&
           rssTranslateRecord.firecrawlApiKey
         ) {
-          originContent =
-            (await step.run(`scrapy full content: ${origin.link}`, async () => {
-              const app = new FirecrawlApp({
-                apiKey: rssTranslateRecord.firecrawlApiKey,
-              });
-              const res = await app.scrapeUrl(origin.link ?? "", {
-                formats: ["html"],
-              });
-              if (res.success) {
-                return res.html;
-              }
-            })) ?? "";
+          // originContent =
+          //   (await step.run(`scrapy full content: ${origin.link}`, async () => {
+          //     const app = new FirecrawlApp({
+          //       apiKey: rssTranslateRecord.firecrawlApiKey,
+          //     });
+          //     const res = await app.scrapeUrl(origin.link ?? "", {
+          //       formats: ["markdown"],
+          //     });
+          //     if (res.success) {
+          //       return res.markdown;
+          //     }
+          //   })) ?? "";
+          originContent = origin.content;
         }
 
-        const content = await step.run(
+        const content = await step.invoke(
           `translate rss content: ${origin.content}`,
-          async () => {
-            return await translate({
+          {
+            function: translate,
+            data: {
               apiKey: rssTranslateRecord.translateOriginData.apiKey ?? "",
               language: rssTranslateRecord.language ?? "",
               model: rssTranslateRecord.translateOriginData.model ?? "",
               prompt: rssTranslateRecord.translatePromptData.prompt ?? "",
               baseUrl: rssTranslateRecord.translateOriginData.baseUrl ?? "",
               content: originContent,
-            });
+            },
           },
         );
 

@@ -21,7 +21,7 @@ export default async function page({
 
   return (
     <div className="flex h-full flex-col space-y-2">
-      <div className="flex justify-end">
+      <div className="flex justify-end space-x-2">
         <RssTranslateFormDialog
           onOk={async () => {
             "use server";
