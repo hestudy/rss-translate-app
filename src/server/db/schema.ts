@@ -265,13 +265,25 @@ export const rssTranslateData = createTable("rssTranslateData", {
     .notNull()
     .references(() => rssTranslate.id, { onDelete: "cascade" }),
   jobId: varchar("job_id", { length: 255 }),
-  createdById: varchar("created_by", { length: 255 })
-    .notNull()
-    .references(() => users.id),
+  createdById: varchar("created_by", { length: 255 }).references(
+    () => users.id,
+  ),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
+
+export const rssTranslateDataRelation = relations(
+  rssTranslateData,
+  ({ one }) => {
+    return {
+      rssTranslate: one(rssTranslate, {
+        fields: [rssTranslateData.rssTranslateId],
+        references: [rssTranslate.id],
+      }),
+    };
+  },
+);
 
 export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
   id: varchar("id", { length: 255 })
@@ -285,24 +297,6 @@ export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
     .notNull()
     .references(() => rssTranslateData.id, { onDelete: "cascade" }),
   jobId: varchar("job_id", { length: 255 }),
-  createdById: varchar("created_by", { length: 255 })
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
-
-export const newRssTranslateData = createTable("newRssTranslateData", {
-  id: varchar("id", { length: 255 })
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => crypto.randomUUID()),
-  feed: json("feed"),
-  rssTranslateId: varchar("rss_translate_id", { length: 255 })
-    .notNull()
-    .references(() => rssTranslate.id, { onDelete: "cascade" }),
-  jobId: varchar("job_id", { length: 255 }),
   createdById: varchar("created_by", { length: 255 }).references(
     () => users.id,
   ),
@@ -311,45 +305,13 @@ export const newRssTranslateData = createTable("newRssTranslateData", {
     .notNull(),
 });
 
-export const newRssTranslateDataRelation = relations(
-  newRssTranslateData,
+export const rssTranslateDataItemRelation = relations(
+  rssTranslateDataItem,
   ({ one }) => {
     return {
-      rssTranslate: one(rssTranslate, {
-        fields: [newRssTranslateData.rssTranslateId],
-        references: [rssTranslate.id],
-      }),
-    };
-  },
-);
-
-export const newRssTranslateDataItem = createTable("newRssTranslateDataItem", {
-  id: varchar("id", { length: 255 })
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => crypto.randomUUID()),
-  origin: json("origin"),
-  data: json("data"),
-  link: varchar("link", { length: 255 }).notNull(),
-  newRssTranslateDataId: varchar("new_rss_translate_data_id", { length: 255 })
-    .notNull()
-    .references(() => newRssTranslateData.id, { onDelete: "cascade" }),
-  jobId: varchar("job_id", { length: 255 }),
-  createdById: varchar("created_by", { length: 255 }).references(
-    () => users.id,
-  ),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
-
-export const newRssTranslateDataItemRelation = relations(
-  newRssTranslateDataItem,
-  ({ one }) => {
-    return {
-      newRssTranslateData: one(newRssTranslateData, {
-        fields: [newRssTranslateDataItem.newRssTranslateDataId],
-        references: [newRssTranslateData.id],
+      rssTranslateData: one(rssTranslateData, {
+        fields: [rssTranslateDataItem.rssTranslateDataId],
+        references: [rssTranslateData.id],
       }),
     };
   },

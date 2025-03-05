@@ -1,9 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
-import {
-  newRssTranslateData,
-  newRssTranslateDataItem,
-} from "~/server/db/schema";
+import { rssTranslateData, rssTranslateDataItem } from "~/server/db/schema";
 import { fetchFeed } from "~/utils/fetchFeed";
 import { inngest } from "../client";
 
@@ -35,12 +32,12 @@ export const fetchRssAndSaveRss = inngest.createFunction(
         },
       );
 
-      const newRssTranslateDataResult = await step.run(
+      const rssTranslateDataResult = await step.run(
         `save rss data: ${feed.title}`,
         async () => {
           return (
             await db
-              .insert(newRssTranslateData)
+              .insert(rssTranslateData)
               .values({
                 rssTranslateId: item.id,
                 feed,
@@ -50,16 +47,17 @@ export const fetchRssAndSaveRss = inngest.createFunction(
         },
       );
 
-      if (newRssTranslateDataResult?.id) {
+      if (rssTranslateDataResult?.id) {
         for (const rssItem of feed.items) {
           await step.run(`save rss item: ${rssItem.title}`, async () => {
-            const rssItemRecord =
-              await db.query.newRssTranslateDataItem.findFirst({
-                where: eq(newRssTranslateDataItem.link, rssItem.link ?? ""),
-              });
+            const rssItemRecord = await db.query.rssTranslateDataItem.findFirst(
+              {
+                where: eq(rssTranslateDataItem.link, rssItem.link ?? ""),
+              },
+            );
             if (!rssItemRecord) {
-              await db.insert(newRssTranslateDataItem).values({
-                newRssTranslateDataId: newRssTranslateDataResult?.id,
+              await db.insert(rssTranslateDataItem).values({
+                rssTranslateDataId: rssTranslateDataResult?.id,
                 link: rssItem.link ?? "",
                 origin: rssItem,
               });

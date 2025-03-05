@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1740991288855,
-      "tag": "0000_strange_fabian_cortez",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1741003174325,
-      "tag": "0001_careful_silverclaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1741095957417,
-      "tag": "0002_chief_princess_powerful",
+      "when": 1741144363374,
+      "tag": "0000_loud_dagger",
       "breakpoints": true
     }
   ]

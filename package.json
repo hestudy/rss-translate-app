@@ -43,7 +43,6 @@
     "@trpc/server": "^11.0.0-rc.446",
     "ahooks": "^3.8.4",
     "bcrypt": "^5.1.1",
-    "bullmq": "^5.41.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",

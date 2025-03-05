@@ -1,7 +1,7 @@
 import { eq, isNull } from "drizzle-orm";
 import type Parser from "rss-parser";
 import { db } from "~/server/db";
-import { newRssTranslateDataItem, rssTranslate } from "~/server/db/schema";
+import { rssTranslate, rssTranslateDataItem } from "~/server/db/schema";
 import { translate } from "~/utils/translate";
 import { inngest } from "../client";
 
@@ -16,10 +16,10 @@ export const translateRss = inngest.createFunction(
     const noTranslateRssItemList = await step.run(
       "get not translate rss item",
       async () => {
-        return await db.query.newRssTranslateDataItem.findMany({
-          where: isNull(newRssTranslateDataItem.data),
+        return await db.query.rssTranslateDataItem.findMany({
+          where: isNull(rssTranslateDataItem.data),
           with: {
-            newRssTranslateData: true,
+            rssTranslateData: true,
           },
         });
       },
@@ -31,7 +31,7 @@ export const translateRss = inngest.createFunction(
         `get rss translate config: ${item.link}`,
         async () => {
           return await db.query.rssTranslate.findFirst({
-            where: eq(rssTranslate.id, item.newRssTranslateData.rssTranslateId),
+            where: eq(rssTranslate.id, item.rssTranslateData.rssTranslateId),
             with: {
               rssOriginData: true,
               translateOriginData: true,
@@ -72,14 +72,14 @@ export const translateRss = inngest.createFunction(
 
         await step.run(`save translate rss: ${item.link}`, async () => {
           await db
-            .update(newRssTranslateDataItem)
+            .update(rssTranslateDataItem)
             .set({
               data: {
                 title,
                 content,
               },
             })
-            .where(eq(newRssTranslateDataItem.id, item.id));
+            .where(eq(rssTranslateDataItem.id, item.id));
         });
       }
     }
