@@ -36,9 +36,6 @@ const RssTanslateHistoryTable = memo(({ data }: { data: any }) => {
       columnHelper.accessor("jobId", {
         header: "JobId",
       }),
-      columnHelper.accessor("jobState", {
-        header: "JobState",
-      }),
       columnHelper.accessor("feed", {
         header: "Feed",
         cell(props) {

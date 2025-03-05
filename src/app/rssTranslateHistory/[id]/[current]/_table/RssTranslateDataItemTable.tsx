@@ -30,9 +30,6 @@ const RssTranslateDataItemTable = memo(({ id }: { id: string }) => {
       columnHelper.accessor("jobId", {
         header: "JobId",
       }),
-      columnHelper.accessor("jobState", {
-        header: "JobState",
-      }),
       columnHelper.accessor("origin", {
         header: "Origin",
         cell(props) {
