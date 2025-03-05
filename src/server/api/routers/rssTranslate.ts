@@ -119,4 +119,28 @@ export const rssTranslateRouter = createTRPCRouter({
         .delete(rssTranslateData)
         .where(eq(rssTranslateData.rssTranslateId, input.id));
     }),
+  enable: authProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .update(rssTranslate)
+        .set({ enabled: true })
+        .where(eq(rssTranslate.id, input.id));
+    }),
+  disable: authProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .update(rssTranslate)
+        .set({ enabled: false })
+        .where(eq(rssTranslate.id, input.id));
+    }),
 });
