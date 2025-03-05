@@ -50,7 +50,7 @@ export const GET = async (
     .sort((a, b) => {
       const aItem = a.data as Parser.Item | undefined;
       const bItem = b.data as Parser.Item | undefined;
-      return dayjs(aItem?.pubDate).unix() - dayjs(bItem?.pubDate).unix();
+      return dayjs(bItem?.pubDate).unix() - dayjs(aItem?.pubDate).unix();
     })
     .forEach((d) => {
       const item = d.data as Parser.Item | undefined;

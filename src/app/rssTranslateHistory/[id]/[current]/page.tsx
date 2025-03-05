@@ -1,12 +1,12 @@
+import { Trash } from "lucide-react";
+import { revalidatePath } from "next/cache";
 import { memo } from "react";
+import { getPathname } from "~/app/_common/getPathname";
+import ConfirmPopover from "~/app/_components/confirmPopover";
 import SPagination from "~/app/_components/SPagination";
+import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
 import RssTanslateHistoryTable from "./_table/RssTanslateHistoryTable";
-import { Button } from "~/components/ui/button";
-import { Trash } from "lucide-react";
-import ConfirmPopover from "~/app/_components/confirmPopover";
-import { getPathname } from "~/app/_common/getPathname";
-import { revalidatePath } from "next/cache";
 
 const page = memo(
   async ({ params }: { params: Promise<{ current: string; id: string }> }) => {
@@ -39,7 +39,13 @@ const page = memo(
           </ConfirmPopover>
         </div>
         <div className="h-0 flex-1 overflow-y-auto">
-          <RssTanslateHistoryTable data={list} />
+          <RssTanslateHistoryTable
+            data={list}
+            onOk={async () => {
+              "use server";
+              revalidatePath(pathname ?? "");
+            }}
+          />
         </div>
         <div>
           <SPagination
