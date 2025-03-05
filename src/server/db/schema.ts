@@ -240,20 +240,24 @@ export const rssTranslate = createTable("rssTranslate", {
   ),
 });
 
-export const rssTranslateRelations = relations(rssTranslate, ({ one }) => ({
-  rssOriginData: one(rssOrigin, {
-    fields: [rssTranslate.rssOrigin],
-    references: [rssOrigin.id],
+export const rssTranslateRelations = relations(
+  rssTranslate,
+  ({ one, many }) => ({
+    rssOriginData: one(rssOrigin, {
+      fields: [rssTranslate.rssOrigin],
+      references: [rssOrigin.id],
+    }),
+    translateOriginData: one(translateOrigin, {
+      fields: [rssTranslate.translateOrigin],
+      references: [translateOrigin.id],
+    }),
+    translatePromptData: one(translatePrompt, {
+      fields: [rssTranslate.translatePrompt],
+      references: [translatePrompt.id],
+    }),
+    rssTranslateData: many(rssTranslateData),
   }),
-  translateOriginData: one(translateOrigin, {
-    fields: [rssTranslate.translateOrigin],
-    references: [translateOrigin.id],
-  }),
-  translatePromptData: one(translatePrompt, {
-    fields: [rssTranslate.translatePrompt],
-    references: [translatePrompt.id],
-  }),
-}));
+);
 
 export const rssTranslateData = createTable("rssTranslateData", {
   id: varchar("id", { length: 255 })
@@ -275,12 +279,13 @@ export const rssTranslateData = createTable("rssTranslateData", {
 
 export const rssTranslateDataRelation = relations(
   rssTranslateData,
-  ({ one }) => {
+  ({ one, many }) => {
     return {
       rssTranslate: one(rssTranslate, {
         fields: [rssTranslateData.rssTranslateId],
         references: [rssTranslate.id],
       }),
+      rssTranslateDataItem: many(rssTranslateDataItem),
     };
   },
 );

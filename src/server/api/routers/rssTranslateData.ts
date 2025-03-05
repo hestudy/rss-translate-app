@@ -66,4 +66,15 @@ export const rssTranslateDataRouter = createTRPCRouter({
         (x, y) => x.rssTranslateDataItem?.link === y.rssTranslateDataItem?.link,
       );
     }),
+  delete: authProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .delete(rssTranslateData)
+        .where(eq(rssTranslateData.id, input.id));
+    }),
 });
