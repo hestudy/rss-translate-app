@@ -12,31 +12,29 @@ export const translateRss = inngest.createFunction(
   {
     cron: "TZ=Asia/Shanghai 30 * * * *",
   },
-  async ({ step, runId }) => {
-    const noTranslateRssItemList = await step.run(
-      "get not translate rss item",
-      async () => {
-        return await db.query.rssTranslateDataItem.findMany({
-          where: isNull(rssTranslateDataItem.data),
-          with: {
-            rssTranslateData: {
-              with: {
-                rssTranslate: true,
-              },
+  async ({ step, runId, logger }) => {
+    const noTranslateRssItemList = await db.query.rssTranslateDataItem.findMany(
+      {
+        where: isNull(rssTranslateDataItem.data),
+        with: {
+          rssTranslateData: {
+            with: {
+              rssTranslate: true,
             },
           },
-        });
+        },
       },
     );
 
-    const enableRssItemList = await step.run(
-      "filter enable rss translate",
-      async () => {
-        return noTranslateRssItemList.filter(
-          (d) => !!d.rssTranslateData.rssTranslate.enabled,
-        );
-      },
+    logger.info(
+      `no translate rss item count: ${noTranslateRssItemList.length}`,
     );
+
+    const enableRssItemList = noTranslateRssItemList.filter(
+      (d) => !!d.rssTranslateData.rssTranslate.enabled,
+    );
+
+    logger.info(`enable rss item count: ${enableRssItemList.length}`);
 
     for (const item of enableRssItemList) {
       const origin = item.origin as Parser.Item;
