@@ -76,18 +76,6 @@ export const translateRss = inngest.createFunction(
           rssTranslateRecord.scrapyFull &&
           rssTranslateRecord.firecrawlApiKey
         ) {
-          // originContent =
-          //   (await step.run(`scrapy full content: ${origin.link}`, async () => {
-          //     const app = new FirecrawlApp({
-          //       apiKey: rssTranslateRecord.firecrawlApiKey,
-          //     });
-          //     const res = await app.scrapeUrl(origin.link ?? "", {
-          //       formats: ["markdown"],
-          //     });
-          //     if (res.success) {
-          //       return res.markdown;
-          //     }
-          //   })) ?? "";
           originContent = origin.content;
         }
 
