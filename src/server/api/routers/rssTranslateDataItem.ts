@@ -3,7 +3,6 @@ import { z } from "zod";
 import { db } from "~/server/db";
 import { rssTranslateDataItem } from "~/server/db/schema";
 import { authProcedure, createTRPCRouter } from "../trpc";
-import { rssTranslateDataItemQueue } from "~/server/queue/rssTranslateDataItem";
 
 export const rssTranslateDataItemRouter = createTRPCRouter({
   list: authProcedure
@@ -13,19 +12,19 @@ export const rssTranslateDataItemRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      return Promise.all(
-        (
-          await db.query.rssTranslateDataItem.findMany({
-            where: eq(rssTranslateDataItem.rssTranslateDataId, input.id),
-          })
-        ).map(async (d) => {
-          return {
-            ...d,
-            jobState: d.jobId
-              ? await rssTranslateDataItemQueue.getJobState(d.jobId)
-              : null,
-          };
-        }),
-      );
+      return await db.query.rssTranslateDataItem.findMany({
+        where: eq(rssTranslateDataItem.rssTranslateDataId, input.id),
+      });
+    }),
+  delete: authProcedure
+    .input(
+      z.object({
+        id: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await db
+        .delete(rssTranslateDataItem)
+        .where(eq(rssTranslateDataItem.id, input.id));
     }),
 });

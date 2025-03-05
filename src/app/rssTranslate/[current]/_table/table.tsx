@@ -1,15 +1,7 @@
 "use client";
 
 import { createColumnHelper } from "@tanstack/react-table";
-import {
-  Edit,
-  FlaskConical,
-  History,
-  Pause,
-  Play,
-  Rss,
-  Trash,
-} from "lucide-react";
+import { Edit, History, Pause, Play, Rss, Trash } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
@@ -30,29 +22,25 @@ export default function RssTranslateTable(props: {
   onOk?: () => void;
 }) {
   const deleteMutation = api.rssTranslate.delete.useMutation();
-  const testMutation = api.rssTranslate.test.useMutation();
-  const disabledMutation = api.rssTranslate.disabled.useMutation();
-  const enabledMutation = api.rssTranslate.enabled.useMutation();
+  const enableMutation = api.rssTranslate.enable.useMutation();
+  const disableMutation = api.rssTranslate.disable.useMutation();
 
   const columns = useMemo(() => {
     return [
-      columnHelper.accessor("rssOrigin.name", {
+      columnHelper.accessor("rssOriginData.name", {
         header: "RssOrigin",
       }),
-      columnHelper.accessor("translateOrigin.name", {
+      columnHelper.accessor("translateOriginData.name", {
         header: "TranslateOrigin",
       }),
-      columnHelper.accessor("translatePrompt.name", {
+      columnHelper.accessor("translatePromptData.name", {
         header: "TranslatePrompt",
       }),
-      columnHelper.accessor("rssTranslate.language", {
+      columnHelper.accessor("language", {
         header: "TranslateLanguage",
       }),
-      columnHelper.accessor("rssTranslate.scrapyFull", {
+      columnHelper.accessor("scrapyFull", {
         header: "ScrapyFull",
-      }),
-      columnHelper.accessor("rssTranslate.jobState", {
-        header: "JobState",
       }),
       columnHelper.display({
         id: "action",
@@ -62,66 +50,53 @@ export default function RssTranslateTable(props: {
             <div>
               <Link
                 target="_blank"
-                href={`/api/rss/${cellProps.row.original.rssTranslate.id}`}
+                href={`/api/rss/${cellProps.row.original.id}`}
               >
                 <Button variant={"ghost"} size={"icon"}>
                   <Rss />
                 </Button>
               </Link>
-              {cellProps.row.original.rssTranslate.enabled && (
+              {cellProps.row.original.enabled && (
                 <ConfirmPopover
                   title="Confirm Pause?"
                   onConfirm={async () => {
-                    await disabledMutation.mutateAsync({
-                      id: cellProps.row.original.rssTranslate.id,
+                    await disableMutation.mutateAsync({
+                      id: cellProps.row.original.id,
                     });
                     toast.success("Pause RssTranslate Success");
                     props.onOk?.();
                   }}
                 >
-                  <Button variant={"ghost"} size={"icon"}>
+                  <Button size={"icon"} variant={"link"}>
                     <Pause />
                   </Button>
                 </ConfirmPopover>
               )}
-              {!cellProps.row.original.rssTranslate.enabled && (
+              {!cellProps.row.original.enabled && (
                 <ConfirmPopover
-                  title="Confirm Play?"
+                  title="Confirm Enable?"
                   onConfirm={async () => {
-                    await enabledMutation.mutateAsync({
-                      id: cellProps.row.original.rssTranslate.id,
+                    await enableMutation.mutateAsync({
+                      id: cellProps.row.original.id,
                     });
-                    toast.success("Play RssTranslate Success");
+                    toast.success("Enable RssTranslate Success");
                     props.onOk?.();
                   }}
                 >
-                  <Button variant={"ghost"} size={"icon"}>
+                  <Button size={"icon"} variant={"link"}>
                     <Play />
                   </Button>
                 </ConfirmPopover>
               )}
-              <ConfirmPopover
-                title="Confirm Run?"
-                onConfirm={async () => {
-                  await testMutation.mutateAsync({
-                    id: cellProps.row.original.rssTranslate.id,
-                  });
-                  props.onOk?.();
-                }}
-              >
-                <Button variant={"ghost"} size={"icon"}>
-                  <FlaskConical />
-                </Button>
-              </ConfirmPopover>
               <Link
-                href={`/rssTranslateHistory/${cellProps.row.original.rssTranslate.id}/1`}
+                href={`/rssTranslateHistory/${cellProps.row.original.id}/1`}
               >
                 <Button size={"icon"} variant={"link"}>
                   <History />
                 </Button>
               </Link>
               <RssTranslateFormDialog
-                id={cellProps.row.original.rssTranslate.id}
+                id={cellProps.row.original.id}
                 onOk={props.onOk}
               >
                 <Button variant={"ghost"} size={"icon"}>
@@ -132,7 +107,7 @@ export default function RssTranslateTable(props: {
                 title="Delete RssTranslate?"
                 onConfirm={async () => {
                   await deleteMutation.mutateAsync({
-                    id: cellProps.row.original.rssTranslate.id,
+                    id: cellProps.row.original.id,
                   });
                   toast.success("Delete RssTranslate Success");
                   props.onOk?.();

@@ -240,6 +240,25 @@ export const rssTranslate = createTable("rssTranslate", {
   ),
 });
 
+export const rssTranslateRelations = relations(
+  rssTranslate,
+  ({ one, many }) => ({
+    rssOriginData: one(rssOrigin, {
+      fields: [rssTranslate.rssOrigin],
+      references: [rssOrigin.id],
+    }),
+    translateOriginData: one(translateOrigin, {
+      fields: [rssTranslate.translateOrigin],
+      references: [translateOrigin.id],
+    }),
+    translatePromptData: one(translatePrompt, {
+      fields: [rssTranslate.translatePrompt],
+      references: [translatePrompt.id],
+    }),
+    rssTranslateData: many(rssTranslateData),
+  }),
+);
+
 export const rssTranslateData = createTable("rssTranslateData", {
   id: varchar("id", { length: 255 })
     .primaryKey()
@@ -250,13 +269,26 @@ export const rssTranslateData = createTable("rssTranslateData", {
     .notNull()
     .references(() => rssTranslate.id, { onDelete: "cascade" }),
   jobId: varchar("job_id", { length: 255 }),
-  createdById: varchar("created_by", { length: 255 })
-    .notNull()
-    .references(() => users.id),
+  createdById: varchar("created_by", { length: 255 }).references(
+    () => users.id,
+  ),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
+
+export const rssTranslateDataRelation = relations(
+  rssTranslateData,
+  ({ one, many }) => {
+    return {
+      rssTranslate: one(rssTranslate, {
+        fields: [rssTranslateData.rssTranslateId],
+        references: [rssTranslate.id],
+      }),
+      rssTranslateDataItem: many(rssTranslateDataItem),
+    };
+  },
+);
 
 export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
   id: varchar("id", { length: 255 })
@@ -270,10 +302,22 @@ export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
     .notNull()
     .references(() => rssTranslateData.id, { onDelete: "cascade" }),
   jobId: varchar("job_id", { length: 255 }),
-  createdById: varchar("created_by", { length: 255 })
-    .notNull()
-    .references(() => users.id),
+  createdById: varchar("created_by", { length: 255 }).references(
+    () => users.id,
+  ),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
+
+export const rssTranslateDataItemRelation = relations(
+  rssTranslateDataItem,
+  ({ one }) => {
+    return {
+      rssTranslateData: one(rssTranslateData, {
+        fields: [rssTranslateDataItem.rssTranslateDataId],
+        references: [rssTranslateData.id],
+      }),
+    };
+  },
+);

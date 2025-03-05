@@ -1,2 +1,0 @@
-ALTER TABLE "rss-translate-app_rssTranslate" ADD COLUMN "scrapy_full" boolean DEFAULT false;--> statement-breakpoint
-ALTER TABLE "rss-translate-app_rssTranslate" ADD COLUMN "firecrawl_api_key" varchar(255);

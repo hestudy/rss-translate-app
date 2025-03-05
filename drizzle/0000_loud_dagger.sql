@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS "rss-translate-app_rssTranslate" (
 	"language" varchar(255) NOT NULL,
 	"cron" varchar(255) NOT NULL,
 	"enabled" boolean NOT NULL,
+	"scrapy_full" boolean DEFAULT false,
+	"firecrawl_api_key" varchar(255),
 	"created_by" varchar(255) NOT NULL,
 	"job_id" varchar(255),
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -51,7 +53,7 @@ CREATE TABLE IF NOT EXISTS "rss-translate-app_rssTranslateData" (
 	"feed" json,
 	"rss_translate_id" varchar(255) NOT NULL,
 	"job_id" varchar(255),
-	"created_by" varchar(255) NOT NULL,
+	"created_by" varchar(255),
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
@@ -62,7 +64,7 @@ CREATE TABLE IF NOT EXISTS "rss-translate-app_rssTranslateDataItem" (
 	"link" varchar(255) NOT NULL,
 	"rss_translate_data_id" varchar(255) NOT NULL,
 	"job_id" varchar(255),
-	"created_by" varchar(255) NOT NULL,
+	"created_by" varchar(255),
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
