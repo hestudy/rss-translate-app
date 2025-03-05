@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { eq, isNotNull } from "drizzle-orm";
 import { uniqBy } from "lodash";
 import { type NextRequest } from "next/server";
@@ -45,17 +46,23 @@ export const GET = async (
       list.push(dd);
     });
   });
-  uniqBy(list, "link").forEach((d) => {
-    const item = d.data as Parser.Item | undefined;
-    if (item) {
-      feed.item({
-        date: item.pubDate ?? "",
-        description: item.content ?? "",
-        title: item.title ?? "",
-        url: item.link ?? "",
-      });
-    }
-  });
+  uniqBy(list, "link")
+    .sort((a, b) => {
+      const aItem = a.data as Parser.Item | undefined;
+      const bItem = b.data as Parser.Item | undefined;
+      return dayjs(aItem?.pubDate).unix() - dayjs(bItem?.pubDate).unix();
+    })
+    .forEach((d) => {
+      const item = d.data as Parser.Item | undefined;
+      if (item) {
+        feed.item({
+          date: item.pubDate ?? "",
+          description: item.content ?? "",
+          title: item.title ?? "",
+          url: item.link ?? "",
+        });
+      }
+    });
 
   const headers = new Headers();
 

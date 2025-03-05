@@ -111,6 +111,7 @@ export const translateRss = inngest.createFunction(
             .update(rssTranslateDataItem)
             .set({
               data: {
+                ...origin,
                 title,
                 content,
               },
