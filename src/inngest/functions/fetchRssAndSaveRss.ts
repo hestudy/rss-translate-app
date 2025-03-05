@@ -1,6 +1,10 @@
 import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
-import { rssTranslateData, rssTranslateDataItem } from "~/server/db/schema";
+import {
+  rssTranslate,
+  rssTranslateData,
+  rssTranslateDataItem,
+} from "~/server/db/schema";
 import { fetchFeed } from "~/utils/fetchFeed";
 import { inngest } from "../client";
 
@@ -11,9 +15,9 @@ export const fetchRssAndSaveRss = inngest.createFunction(
   {
     cron: "TZ=Asia/Shanghai 0 * * * *",
   },
-  async ({ step }) => {
+  async ({ step, runId }) => {
     const rssTranslateList = await step.run(
-      "get all rss translate list",
+      "get enabled rss translate list",
       async () => {
         return await db.query.rssTranslate.findMany({
           with: {
@@ -21,6 +25,7 @@ export const fetchRssAndSaveRss = inngest.createFunction(
             translateOriginData: true,
             translatePromptData: true,
           },
+          where: eq(rssTranslate.enabled, true),
         });
       },
     );
@@ -41,6 +46,7 @@ export const fetchRssAndSaveRss = inngest.createFunction(
               .values({
                 rssTranslateId: item.id,
                 feed,
+                jobId: runId,
               })
               .returning()
           ).at(0);
@@ -60,6 +66,7 @@ export const fetchRssAndSaveRss = inngest.createFunction(
                 rssTranslateDataId: rssTranslateDataResult?.id,
                 link: rssItem.link ?? "",
                 origin: rssItem,
+                jobId: runId,
               });
             }
           });

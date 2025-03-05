@@ -1,3 +1,4 @@
+import FirecrawlApp from "@mendable/firecrawl-js";
 import { eq, isNull } from "drizzle-orm";
 import type Parser from "rss-parser";
 import { db } from "~/server/db";
@@ -12,7 +13,7 @@ export const translateRss = inngest.createFunction(
   {
     cron: "TZ=Asia/Shanghai 30 * * * *",
   },
-  async ({ step }) => {
+  async ({ step, runId }) => {
     const noTranslateRssItemList = await step.run(
       "get not translate rss item",
       async () => {
@@ -56,6 +57,26 @@ export const translateRss = inngest.createFunction(
           },
         );
 
+        let originContent = origin.content;
+
+        if (
+          rssTranslateRecord.scrapyFull &&
+          rssTranslateRecord.firecrawlApiKey
+        ) {
+          originContent =
+            (await step.run(`scrapy full content: ${origin.link}`, async () => {
+              const app = new FirecrawlApp({
+                apiKey: rssTranslateRecord.firecrawlApiKey,
+              });
+              const res = await app.scrapeUrl(origin.link ?? "", {
+                formats: ["html"],
+              });
+              if (res.success) {
+                return res.html;
+              }
+            })) ?? "";
+        }
+
         const content = await step.run(
           `translate rss content: ${origin.content}`,
           async () => {
@@ -65,7 +86,7 @@ export const translateRss = inngest.createFunction(
               model: rssTranslateRecord.translateOriginData.model ?? "",
               prompt: rssTranslateRecord.translatePromptData.prompt ?? "",
               baseUrl: rssTranslateRecord.translateOriginData.baseUrl ?? "",
-              content: origin.content,
+              content: originContent,
             });
           },
         );
@@ -78,6 +99,7 @@ export const translateRss = inngest.createFunction(
                 title,
                 content,
               },
+              jobId: runId,
             })
             .where(eq(rssTranslateDataItem.id, item.id));
         });
