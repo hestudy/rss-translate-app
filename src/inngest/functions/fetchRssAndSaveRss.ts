@@ -57,21 +57,19 @@ export const fetchRssAndSaveRss = inngest.createFunction(
 
       if (rssTranslateDataResult?.id) {
         for (const rssItem of feed.items) {
-          await step.run(`save rss item: ${rssItem.title}`, async () => {
-            const rssItemRecord = await db.query.rssTranslateDataItem.findFirst(
-              {
-                where: eq(rssTranslateDataItem.link, rssItem.link ?? ""),
-              },
-            );
-            if (!rssItemRecord) {
+          const rssItemRecord = await db.query.rssTranslateDataItem.findFirst({
+            where: eq(rssTranslateDataItem.link, rssItem.link ?? ""),
+          });
+          if (!rssItemRecord) {
+            await step.run(`save rss item: ${rssItem.title}`, async () => {
               await db.insert(rssTranslateDataItem).values({
                 rssTranslateDataId: rssTranslateDataResult?.id,
                 link: rssItem.link ?? "",
                 origin: rssItem,
                 jobId: runId,
               });
-            }
-          });
+            });
+          }
         }
       }
     }

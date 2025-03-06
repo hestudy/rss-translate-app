@@ -3,11 +3,15 @@ import type Parser from "rss-parser";
 import { db } from "~/server/db";
 import { rssTranslate, rssTranslateDataItem } from "~/server/db/schema";
 import { inngest } from "../client";
+import { firecrawlScrapy } from "./firecrawlScrapy";
+import { mdToHtml } from "./mdToHtml";
+import { rssScrapy } from "./rssScrapy";
 import { translate } from "./translate";
 
 export const translateRss = inngest.createFunction(
   {
     id: "translate rss",
+    concurrency: 1,
   },
   {
     cron: "TZ=Asia/Shanghai 30 * * * *",
@@ -70,14 +74,43 @@ export const translateRss = inngest.createFunction(
 
         let originContent = origin.content;
 
-        if (
-          rssTranslateRecord.scrapyFull &&
-          rssTranslateRecord.firecrawlApiKey
-        ) {
-          originContent = origin.content;
+        if (rssTranslateRecord.scrapyFull) {
+          if (item.fullContent) {
+            originContent = item.fullContent;
+          } else {
+            if (rssTranslateRecord.firecrawlApiKey) {
+              originContent = await step.invoke(
+                `use firecrawl scrapy rss: ${item.link}`,
+                {
+                  function: firecrawlScrapy,
+                  data: {
+                    url: item.link,
+                    apikey: rssTranslateRecord.firecrawlApiKey,
+                  },
+                },
+              );
+            } else {
+              originContent = await step.invoke(`scrapy rss: ${item.link}`, {
+                function: rssScrapy,
+                data: {
+                  url: item.link,
+                },
+              });
+            }
+
+            await step.run(`save full content: ${item.link}`, async () => {
+              await db
+                .update(rssTranslateDataItem)
+                .set({
+                  fullContent: originContent,
+                  jobId: runId,
+                })
+                .where(eq(rssTranslateDataItem.id, item.id));
+            });
+          }
         }
 
-        const content = await step.invoke(
+        let content = await step.invoke(
           `translate rss content: ${origin.content}`,
           {
             function: translate,
@@ -91,6 +124,14 @@ export const translateRss = inngest.createFunction(
             },
           },
         );
+        if (rssTranslateRecord.scrapyFull && content) {
+          content = await step.invoke("md to html", {
+            function: mdToHtml,
+            data: {
+              content,
+            },
+          });
+        }
 
         await step.run(`save translate rss: ${item.link}`, async () => {
           await db

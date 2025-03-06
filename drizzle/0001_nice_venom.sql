@@ -1,0 +1,1 @@
+ALTER TABLE "rss-translate-app_rssTranslateDataItem" ADD COLUMN "full_content" text;

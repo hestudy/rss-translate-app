@@ -4,19 +4,12 @@ import { inngest } from "../client";
 
 const parser = new Parser();
 
-const schema = z.object({
-  url: z.string().url(),
-});
-
 export const fetchFeed = inngest.createFunction(
   {
     id: "fetch-feed",
   },
-  { event: "feed/fetch" },
+  { event: "rss/fetch" },
   async ({ event }) => {
-    const validate = schema.safeParse(event.data);
-    if (validate.success) {
-      return await parser.parseURL(validate.data.url);
-    }
+    return await parser.parseURL(event.data.url);
   },
 );

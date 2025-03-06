@@ -297,6 +297,7 @@ export const rssTranslateDataItem = createTable("rssTranslateDataItem", {
     .$defaultFn(() => crypto.randomUUID()),
   origin: json("origin"),
   data: json("data"),
+  fullContent: text("full_content"),
   link: varchar("link", { length: 255 }).notNull(),
   rssTranslateDataId: varchar("rss_translate_data_id", { length: 255 })
     .notNull()
