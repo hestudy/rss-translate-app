@@ -15,21 +15,19 @@ export const fetchRssAndSaveRss = inngest.createFunction(
   {
     cron: "TZ=Asia/Shanghai 0 * * * *",
   },
-  async ({ step, runId }) => {
-    const rssTranslateList = await step.run(
-      "get enabled rss translate list",
-      async () => {
-        return await db.query.rssTranslate.findMany({
-          with: {
-            rssOriginData: true,
-            translateOriginData: true,
-            translatePromptData: true,
-          },
-          where: eq(rssTranslate.enabled, true),
-        });
+  async ({ step, runId, logger }) => {
+    const enableRssTranslateList = await db.query.rssTranslate.findMany({
+      with: {
+        rssOriginData: true,
+        translateOriginData: true,
+        translatePromptData: true,
       },
-    );
-    for (const item of rssTranslateList) {
+      where: eq(rssTranslate.enabled, true),
+    });
+
+    logger.info(`enable rss translate count: ${enableRssTranslateList.length}`);
+
+    for (const item of enableRssTranslateList) {
       const feed = await step.invoke(`fetch rss ${item.rssOriginData.link}`, {
         function: fetchFeed,
         data: {
