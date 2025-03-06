@@ -40,16 +40,20 @@ export const fetchRssAndSaveRss = inngest.createFunction(
       const rssTranslateDataResult = await step.run(
         `save rss data: ${feed.title}`,
         async () => {
-          return (
+          const record = (
             await db
               .insert(rssTranslateData)
               .values({
                 rssTranslateId: item.id,
-                feed: JSON.parse(JSON.stringify(feed)),
+                feed,
                 jobId: runId,
               })
               .returning()
           ).at(0);
+          if (record) {
+            const { feed, ...props } = record;
+            return props;
+          }
         },
       );
 
