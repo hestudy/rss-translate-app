@@ -45,7 +45,7 @@ export const fetchRssAndSaveRss = inngest.createFunction(
               .insert(rssTranslateData)
               .values({
                 rssTranslateId: item.id,
-                feed,
+                feed: JSON.parse(JSON.stringify(feed)),
                 jobId: runId,
               })
               .returning()
